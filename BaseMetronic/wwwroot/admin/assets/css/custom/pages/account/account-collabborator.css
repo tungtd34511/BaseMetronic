@@ -1,0 +1,94 @@
+﻿@charset "UTF-8";
+.table-content {
+    padding: 15px;
+    background: var(--bs-app-header-base-bg-color);
+    border-radius: 8px;
+}
+
+table thead tr th {
+    white-space: nowrap;
+}
+
+#tableData thead tr th:nth-child(1),
+#tableData tbody tr td:nth-child(1),
+#tableData tfoot tr th:nth-child(1) {
+    text-align: center;
+    width: 20px !important;
+    max-width: 20px !important;
+}
+
+#tableData thead tr th:nth-child(2),
+#tableData tbody tr td:nth-child(2),
+#tableData tfoot tr th:nth-child(2) {
+    width: 200px !important;
+    max-width: 200px !important;
+}
+
+#tableData thead tr th:nth-child(3),
+#tableData thead tr th:nth-child(4),
+#tableData thead tr th:nth-child(5),
+#tableData thead tr th:nth-child(6) {
+    padding: 9.75px !important;
+}
+
+#tableData thead tr th:nth-child(3),
+#tableData tbody tr td:nth-child(3),
+#tableData tfoot tr th:nth-child(3) {
+    width: 150px !important;
+    max-width: 150px !important;
+}
+
+#tableData thead tr th:nth-child(4),
+#tableData tbody tr td:nth-child(4),
+#tableData tfoot tr th:nth-child(4) {
+    width: 150px !important;
+    max-width: 150px !important;
+    /*text-align: center !important;*/
+}
+
+#tableData thead tr th:nth-child(5),
+#tableData tbody tr td:nth-child(5),
+#tableData tfoot tr th:nth-child(5) {
+    width: 250px !important;
+    max-width: 250px !important;
+    text-align: center !important;
+}
+
+#tableData thead tr th:nth-child(6),
+#tableData tbody tr td:nth-child(6),
+#tableData tfoot tr th:nth-child(6) {
+    width: 150px !important;
+    max-width: 150px !important;
+    text-align: center !important;
+}
+
+#tableData thead tr th:nth-child(7),
+#tableData tbody tr td:nth-child(7),
+#tableData tfoot tr th:nth-child(7) {
+    text-align: center !important;
+}
+
+#reset_Password {
+    float: right;
+    background-color: transparent;
+    border: none;
+}
+
+#toggle_password {
+    top: 55%;
+    left: 90%;
+}
+
+#account-photo {
+    height: 120px !important;
+    width: 150px !important;
+    object-fit: cover;
+}
+
+.accountPhoto {
+    object-fit: cover;
+    border-radius: 50%;
+}
+.checkIsApproved {
+    cursor: pointer;
+}

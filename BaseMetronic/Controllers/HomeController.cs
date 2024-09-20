@@ -1,4 +1,4 @@
-﻿using BaseMetronic.Models;
+﻿using BaseMetronic.Models.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
