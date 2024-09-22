@@ -1,5 +1,7 @@
 ﻿using BaseMetronic.Constants;
-using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.RenderTree;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaseMetronic.Controllers.Admin
@@ -9,6 +11,7 @@ namespace BaseMetronic.Controllers.Admin
     {
         [Route("")]
         [Route("index")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Index()
         {
             return View();
@@ -26,9 +29,16 @@ namespace BaseMetronic.Controllers.Admin
         public IActionResult SignOut()
         {
             // Capture the current URL (full path) to redirect back after signing in again
-            string redirectUrl = HttpContext.Request.GetDisplayUrl();  // Gets the full current URL
-            HttpContext.Response.Cookies.Delete(SystemConstant.Authorization.Scheme);
-            return RedirectToAction("SignIn", new { returnUrl = redirectUrl });
+            string redirectUrl = HttpContext.Request.Headers["Referer"].ToString(); // Gets the full current URL
+            if (!string.IsNullOrEmpty(redirectUrl))
+            {
+                Uri refererUri = new Uri(redirectUrl);
+                redirectUrl = refererUri.PathAndQuery;
+                HttpContext.Response.Cookies.Delete(SystemConstant.Authorization.Scheme);
+                return RedirectToAction("SignIn", new { returnUrl = redirectUrl });
+            }
+           
+            return RedirectToAction("SignIn");
         }
 
         [Route("reset-password")]

@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Class definition
 var KTSigninGeneral = function() {
@@ -18,17 +18,17 @@ var KTSigninGeneral = function() {
                         validators: {
                             regexp: {
                                 regexp: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                message: 'The value is not a valid email address',
+                                message: 'Địa chỉ email không đúng định dạng',
                             },
 							notEmpty: {
-								message: 'Email address is required'
+								message: 'Địa chỉ email không được để trống'
 							}
 						}
 					},
                     'password': {
                         validators: {
                             notEmpty: {
-                                message: 'The password is required'
+                                message: 'Mật khẩu không được để trống'
                             }
                         }
                     } 
@@ -45,68 +45,6 @@ var KTSigninGeneral = function() {
 		);	
     }
 
-    var handleSubmitDemo = function(e) {
-        // Handle form submit
-        submitButton.addEventListener('click', function (e) {
-            // Prevent button default action
-            e.preventDefault();
-
-            // Validate form
-            validator.validate().then(function (status) {
-                if (status == 'Valid') {
-                    // Show loading indication
-                    submitButton.setAttribute('data-kt-indicator', 'on');
-
-                    // Disable button to avoid multiple click 
-                    submitButton.disabled = true;
-                    
-
-                    // Simulate ajax request
-                    setTimeout(function() {
-                        // Hide loading indication
-                        submitButton.removeAttribute('data-kt-indicator');
-
-                        // Enable button
-                        submitButton.disabled = false;
-
-                        // Show message popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                        Swal.fire({
-                            text: "You have successfully logged in!",
-                            icon: "success",
-                            buttonsStyling: false,
-                            confirmButtonText: "Ok, got it!",
-                            customClass: {
-                                confirmButton: "btn btn-primary"
-                            }
-                        }).then(function (result) {
-                            if (result.isConfirmed) { 
-                                form.querySelector('[name="email"]').value= "";
-                                form.querySelector('[name="password"]').value= "";  
-                                                              
-                                //form.submit(); // submit form
-                                var redirectUrl = form.getAttribute('data-kt-redirect-url');
-                                if (redirectUrl) {
-                                    location.href = redirectUrl;
-                                }
-                            }
-                        });
-                    }, 2000);   						
-                } else {
-                    // Show error popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                    Swal.fire({
-                        text: "Sorry, looks like there are some errors detected, please try again.",
-                        icon: "error",
-                        buttonsStyling: false,
-                        confirmButtonText: "Ok, got it!",
-                        customClass: {
-                            confirmButton: "btn btn-primary"
-                        }
-                    });
-                }
-            });
-		});
-    }
-
     var handleSubmitAjax = function(e) {
         // Handle form submit
         submitButton.addEventListener('click', function (e) {
@@ -114,58 +52,90 @@ var KTSigninGeneral = function() {
             e.preventDefault();
 
             // Validate form
-            validator.validate().then(function (status) {
+            validator.validate().then(async function (status) {
                 if (status == 'Valid') {
-                    // Hide loading indication
-                    submitButton.removeAttribute('data-kt-indicator');
+                    // Show loading indication
+                    submitButton.setAttribute('data-kt-indicator', 'on');
 
-                    // Enable button
-                    submitButton.disabled = false;
-                                        
-                    // Check axios library docs: https://axios-http.com/docs/intro 
-                    axios.post('/your/ajax/login/url', {
-                        email: form.querySelector('[name="email"]').value, 
-                        password: form.querySelector('[name="password"]').value 
-                    }).then(function (response) {
-                        if (response) {
-                            form.querySelector('[name="email"]').value= "";
-                            form.querySelector('[name="password"]').value= "";  
+                    // Disable button to avoid multiple click 
+                    submitButton.disabled = true;
+                    
+                    try {
+                        let data = {
+                            email: form.querySelector('[name="email"]').value,
+                            password: form.querySelector('[name="password"]').value
+                        };
+                        let res = await httpService.postAsync("account/api/sign-in", data);
+                        if (res.isSucceeded) {
+                            var accountName = res.resources.accountFullName;
+                            Swal.fire({
+                                title: '<h3 class="text-primary">🎉 Chào mừng!</h3>',
+                                html: `
+                <div class="alert alert-success">
+                    Xin chào <strong>${accountName}</strong>! Bạn đã đăng nhập thành công.
+                </div>
+                <p class="text-muted" style="font-size: 14px;">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>`,
+                                icon: 'success',
+                                confirmButtonText: '<span class="text-white">Bắt đầu ngay</span>',
+                                customClass: {
+                                    popup: 'border-0 shadow',            // Sử dụng Bootstrap class cho viền và bóng
+                                    confirmButton: 'btn btn-primary',    // Nút "Bắt đầu ngay" dùng class Bootstrap
+                                    title: 'text-primary',               // Tiêu đề với màu xanh Bootstrap
+                                    htmlContainer: 'text-muted',         // Nội dung có màu xám nhẹ
+                                    icon: 'text-success'                 // Màu biểu tượng thành công
+                                },
+                            }).then(() => {
+                                localStorage.setItem("Authorization", res.resources.token)
+                                document.cookie = `Authorization=${res.resources.token};path=/;`;
 
-                            const redirectUrl = form.getAttribute('data-kt-redirect-url');
-                            
-                            if (redirectUrl) {
-                                location.href = redirectUrl;
-                            }
-                        } else {
+                                const currentUrl = (new URL(location.href)).searchParams.get("returnurl");
+                                if (currentUrl && currentUrl.length>0) {
+                                    location.href = currentUrl;
+                                    return;
+                                }
+                                const redirectUrl = form.getAttribute('data-kt-redirect-url');
+                                if (redirectUrl) {
+                                    location.href = redirectUrl;
+                                }
+                            });
+                           
+                        }
+                        else {
                             // Show error popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
                             Swal.fire({
-                                text: "Sorry, the email or password is incorrect, please try again.",
+                                text: "Xin lỗi, email hoặc mật khẩu không đúng, vui lòng thử lại.",
                                 icon: "error",
                                 buttonsStyling: false,
-                                confirmButtonText: "Ok, got it!",
                                 customClass: {
                                     confirmButton: "btn btn-primary"
                                 }
                             });
                         }
-                    }).catch(function (error) {
+
+                    } catch (e) {
+                        console.warn(e);
                         Swal.fire({
-                            text: "Sorry, looks like there are some errors detected, please try again.",
+                            text: "Xin lỗi, có vẻ như đã phát hiện một số lỗi, vui lòng thử lại.",
                             icon: "error",
                             buttonsStyling: false,
-                            confirmButtonText: "Ok, got it!",
                             customClass: {
                                 confirmButton: "btn btn-primary"
                             }
                         });
-                    });
+                    }
+                    finally {
+                        // Hide loading indication
+                        submitButton.removeAttribute('data-kt-indicator');
+
+                        // Enable button
+                        submitButton.disabled = false;
+                    }
                 } else {
                     // Show error popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
                     Swal.fire({
-                        text: "Sorry, looks like there are some errors detected, please try again.",
+                        text: "Xin lỗi, có vẻ như đã phát hiện một số lỗi, vui lòng thử lại.",
                         icon: "error",
                         buttonsStyling: false,
-                        confirmButtonText: "Ok, got it!",
                         customClass: {
                             confirmButton: "btn btn-primary"
                         }
@@ -183,8 +153,7 @@ var KTSigninGeneral = function() {
             submitButton = document.querySelector('#kt_sign_in_submit');
             
             handleValidation();
-            handleSubmitDemo(); // used for demo purposes only, if you use the below ajax version you can uncomment this one
-            //handleSubmitAjax(); // use for ajax submit
+            handleSubmitAjax(); // use for ajax submit
         }
     };
 }();

@@ -13,8 +13,8 @@ class HttpService {
                 type: 'GET',
                 url: systemURL + url,
                 beforeSend: function (xhr) {
-                    if (localStorage.token) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
                     }
                 },
                 success: function (data) {
@@ -45,8 +45,8 @@ class HttpService {
                 data: data,
                 contentType: contentType,
                 beforeSend: function (xhr) {
-                    if (localStorage.token) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
                     }
                 },
                 success: function (data) {
@@ -77,8 +77,8 @@ class HttpService {
                 data: data,
                 contentType: contentType,
                 beforeSend: function (xhr) {
-                    if (localStorage.token) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
                     }
                 },
                 success: function (data) {
@@ -102,8 +102,8 @@ class HttpService {
                 type: 'DELETE',
                 url: systemURL + url,
                 beforeSend: function (xhr) {
-                    if (localStorage.token) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
                     }
                 },
                 success: function (data) {
@@ -136,8 +136,8 @@ class HttpService {
                 processData: false,
                 contentType: false,
                 beforeSend: function (xhr) {
-                    if (localStorage.token) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token);
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
                     }
                 },
                 success: function (data) {

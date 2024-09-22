@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Class definition
 var KTSignupGeneral = function() {
@@ -15,17 +15,17 @@ var KTSignupGeneral = function() {
 			form,
 			{
 				fields: {
-					'first-name': {
+					'firstName': {
 						validators: {
 							notEmpty: {
-								message: 'First Name is required'
+								message: 'Họ không được để trống'
 							}
 						}
                     },
-                    'last-name': {
+                    'lastName': {
 						validators: {
 							notEmpty: {
-								message: 'Last Name is required'
+								message: 'Tên không được để trống'
 							}
 						}
 					},
@@ -33,20 +33,20 @@ var KTSignupGeneral = function() {
                         validators: {
                             regexp: {
                                 regexp: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                message: 'The value is not a valid email address',
+                                message: 'Địa chỉ email không chính xác',
                             },
 							notEmpty: {
-								message: 'Email address is required'
+								message: 'Địa chỉ email không được để trống'
 							}
 						}
 					},
                     'password': {
                         validators: {
                             notEmpty: {
-                                message: 'The password is required'
+                                message: 'Mật khẩu không được để trống'
                             },
                             callback: {
-                                message: 'Please enter valid password',
+                                message: 'Vui lòng nhập mật khẩu đúng định dạng',
                                 callback: function(input) {
                                     if (input.value.length > 0) {
                                         return validatePassword();
@@ -55,23 +55,23 @@ var KTSignupGeneral = function() {
                             }
                         }
                     },
-                    'confirm-password': {
+                    'confirmPassword': {
                         validators: {
                             notEmpty: {
-                                message: 'The password confirmation is required'
+                                message: 'Mật khẩu xác nhận không được để trống'
                             },
                             identical: {
                                 compare: function() {
                                     return form.querySelector('[name="password"]').value;
                                 },
-                                message: 'The password and its confirm are not the same'
+                                message: 'Mật khẩu và mật khẩu xác nhận không giống nhau'
                             }
                         }
                     },
                     'toc': {
                         validators: {
                             notEmpty: {
-                                message: 'You must accept the terms and conditions'
+                                message: 'Bạn phải đồng ý với chính xác và điều khoản'
                             }
                         }
                     }
@@ -97,7 +97,7 @@ var KTSignupGeneral = function() {
 
             validator.revalidateField('password');
 
-            validator.validate().then(function(status) {
+            validator.validate().then(async function(status) {
 		        if (status == 'Valid') {
                     // Show loading indication
                     submitButton.setAttribute('data-kt-indicator', 'on');
@@ -106,43 +106,79 @@ var KTSignupGeneral = function() {
                     submitButton.disabled = true;
 
                     // Simulate ajax request
-                    setTimeout(function() {
+                    try {
+                        let data = {
+                            firstName: $(form).find("[name=firstName]").val().trim(),
+                            middleName: $(form).find("[name=middleName]").val().trim(),
+                            lastName: $(form).find("[name=lastName]").val().trim(),
+                            email: $(form).find("[name=email]").val(),
+                            password: $(form).find("[name=password]").val(),
+                            confirmPassword: $(form).find("[name=confirmPassword]").val(),
+                            toc: $(form).find("[name=toc]").is(":checked")
+                        }
+                        let res = await httpService.postAsync("account/api/sign-up", data);
+                        if (res.isSucceeded) {
+                            // Show message popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
+                            Swal.fire({
+                                text: "Tài khoản của bạn đã được đăng ký thành công, vui lòng tiếp tục đăng nhập!",
+                                icon: "success",
+                                buttonsStyling: false,
+                                customClass: {
+                                    confirmButton: "btn btn-primary"
+                                }
+                            }).then(function (result) {
+                                if (result.isConfirmed) {
+                                    var redirectUrl = form.getAttribute('data-kt-redirect-url');
+                                    if (redirectUrl) {
+                                        location.href = redirectUrl;
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            var errors = res.errors || [];
+                            let html = "";
+                            if (errors.length > 0) {
+                                html = `
+                                        <ul class="list-group">
+                                            ${errors.map(error => `<li class="list-group-item list-group-item-danger">${error}</li>`).join('')}
+                                        </ul>
+                                    `;
+                            }
+                            // Hiển thị thông báo SweetAlert với Bootstrap styling
+                            Swal.fire({
+                                title: '<h4 class="text-danger">Đã có lỗi xảy ra khi thực hiện đăng ký tài khoản!</h4>',
+                                icon: 'error',
+                                html: html,
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn(e);
+                        Swal.fire({
+                            text: "Rất tiếc, đã có lỗi xảy ra khi thực hiện đăng ký tài khoản. Xin vui lòng thử lại sau!",
+                            icon: "error",
+                            buttonsStyling: false,
+                            customClass: {
+                                confirmButton: "btn btn-primary"
+                            }
+                        });
+                    }
+                    finally {
                         // Hide loading indication
                         submitButton.removeAttribute('data-kt-indicator');
 
                         // Enable button
                         submitButton.disabled = false;
-
-                        // Show message popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                        Swal.fire({
-                            text: "You have successfully reset your password!",
-                            icon: "success",
-                            buttonsStyling: false,
-                            confirmButtonText: "Ok, got it!",
-                            customClass: {
-                                confirmButton: "btn btn-primary"
-                            }
-                        }).then(function (result) {
-                            if (result.isConfirmed) { 
-                                form.reset();  // reset form                    
-                                passwordMeter.reset();  // reset password meter
-                                //form.submit();
-
-                                //form.submit(); // submit form
-                                var redirectUrl = form.getAttribute('data-kt-redirect-url');
-                                if (redirectUrl) {
-                                    location.href = redirectUrl;
-                                }
-                            }
-                        });
-                    }, 1500);   						
+                    }					
                 } else {
                     // Show error popup. For more info check the plugin's official documentation: https://sweetalert2.github.io/
                     Swal.fire({
-                        text: "Sorry, looks like there are some errors detected, please try again.",
+                        text: "Rất tiếc, có vẻ như đã phát hiện ra một số lỗi, vui lòng thử lại.",
                         icon: "error",
                         buttonsStyling: false,
-                        confirmButtonText: "Ok, got it!",
                         customClass: {
                             confirmButton: "btn btn-primary"
                         }
@@ -171,7 +207,7 @@ var KTSignupGeneral = function() {
             // Elements
             form = document.querySelector('#kt_sign_up_form');
             submitButton = document.querySelector('#kt_sign_up_submit');
-            passwordMeter = KTPasswordMeter.getInstance(form.querySelector('[data-kt-password-meter="true"]'));
+            passwordMeter = KTPasswordMeter.getInstance(form.querySelector('[data-field="password"]'));
 
             handleForm ();
         }
