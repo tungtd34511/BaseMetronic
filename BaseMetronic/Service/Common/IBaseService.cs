@@ -9,11 +9,12 @@ namespace BaseMetronic.Service.Common
     /// Description: IService base
     /// </summary>
     /// <typeparam name="T">Type of entity</typeparam>
-    public interface IBaseService<T> where T : class
+    public interface IBaseService<T> where T : EntityBase<int>
     {
         Task<DionResponse> GetAllAsync();
         Task<DionResponse> GetByIdAsync(params object[] id);
         Task<DionResponse> AddAsync(T entity);
         Task<DionResponse> UpdateAsync(T entity);
+        Task<DionResponse> DeleteAsync(params object[] id);
     }
 }

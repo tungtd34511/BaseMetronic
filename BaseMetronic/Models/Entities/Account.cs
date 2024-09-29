@@ -12,5 +12,7 @@ namespace BaseMetronic.Models.Entities
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Photo { get; set; } = string.Empty;
+        public virtual ICollection<APILog> APILogs { get; set; } = new List<APILog>();
+        public virtual ICollection<DirectoryItem> DirectoryItems { get; set; } = new List<DirectoryItem>();
     }
 }

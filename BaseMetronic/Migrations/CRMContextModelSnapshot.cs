@@ -78,6 +78,149 @@ namespace BaseMetronic.Migrations
 
                     b.ToTable("Account", (string)null);
                 });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.APILog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1001L, 1);
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasComment("Đánh dấu bị xóa");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())")
+                        .HasComment("Ngày tạo");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("APILog", (string)null);
+                });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.DirectoryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1001L, 1);
+
+                    b.Property<bool>("Active")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasComment("Đánh dấu bị xóa");
+
+                    b.Property<int?>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())")
+                        .HasComment("Ngày tạo");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDirectory")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TreeIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("DirectoryItem", (string)null);
+                });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.APILog", b =>
+                {
+                    b.HasOne("BaseMetronic.Models.Entities.Account", "Account")
+                        .WithMany("APILogs")
+                        .HasForeignKey("AccountId");
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.DirectoryItem", b =>
+                {
+                    b.HasOne("BaseMetronic.Models.Entities.Account", "Account")
+                        .WithMany("DirectoryItems")
+                        .HasForeignKey("AuthorId");
+
+                    b.HasOne("BaseMetronic.Models.Entities.DirectoryItem", "ParentItem")
+                        .WithMany("ChildrenItems")
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("ParentItem");
+                });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.Account", b =>
+                {
+                    b.Navigation("APILogs");
+
+                    b.Navigation("DirectoryItems");
+                });
+
+            modelBuilder.Entity("BaseMetronic.Models.Entities.DirectoryItem", b =>
+                {
+                    b.Navigation("ChildrenItems");
+                });
 #pragma warning restore 612, 618
         }
     }

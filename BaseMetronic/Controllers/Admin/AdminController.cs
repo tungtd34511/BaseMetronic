@@ -1,13 +1,13 @@
 ﻿using BaseMetronic.Constants;
+using BaseMetronic.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.RenderTree;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaseMetronic.Controllers.Admin
 {
     [Route("[controller]")]
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
         [Route("")]
         [Route("index")]
@@ -49,6 +49,20 @@ namespace BaseMetronic.Controllers.Admin
 
         [Route("sign-up")]
         public IActionResult SignUp()
+        {
+            return View();
+        }
+        #region Apps
+        [Route("apps/file-manager/folders")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult Folders()
+        {
+            return View();
+        }
+        #endregion
+
+        [Route("error-404")]
+        public IActionResult Error404()
         {
             return View();
         }

@@ -14,6 +14,8 @@ namespace BaseMetronic.Models.Entities
 
         }
         public virtual DbSet<Account> Accounts { get; set; } = null!;
+        public virtual DbSet<APILog> APILogs { get; set; } = null!;
+        public virtual DbSet<DirectoryItem> DirectoryItems { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDbFunction(typeof(DateTimeExtensions).GetMethod(nameof(DateTimeExtensions.ToCustomString))).HasTranslation(

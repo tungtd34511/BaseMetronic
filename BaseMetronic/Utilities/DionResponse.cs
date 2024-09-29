@@ -43,41 +43,12 @@
                 Resources = data
             };
         }
-        public static DionResponse SUCCESS<T>(T? data, string? message = "Success") where T : class
-        {
-            return new DionResponse()
-            {
-                Status = 200,
-                Message = message,
-                IsSucceeded = true,
-                Resources = data
-            };
-        }
-        public static DionResponse SUCCESS()
-        {
-            return new DionResponse()
-            {
-                Status = 200,
-                Message = "SUCCESS",
-                IsSucceeded = true
-            };
-        }
         public static DionResponse Created<T>(T data)
         {
             return new DionResponse()
             {
                 Status = 201,
                 Message = "Created",
-                IsSucceeded = true,
-                Resources = data
-            };
-        }
-        public static DionResponse CREATED<T>(T data)
-        {
-            return new DionResponse()
-            {
-                Status = 201,
-                Message = "CREATED",
                 IsSucceeded = true,
                 Resources = data
             };
@@ -103,18 +74,22 @@
             };
         }
 
-        public static DionResponse NotFound(string Message, object errors)
+        public static DionResponse NotFound(string Message = "NotFound", object? errors = null)
         {
+            if (errors == null)
+            {
+                errors = new List<string>();
+            }
             return Error(404, errors, Message);
         }
 
 
-        public static DionResponse BadRequest(object errors)
+        public static DionResponse BadRequest(string Message = "BadRequest", object? errors = null)
         {
-            return Error(400, errors, "BadRequest");
-        }
-        public static DionResponse BAD_REQUEST(object errors)
-        {
+            if(errors == null)
+            {
+                errors = new List<string>();
+            }
             return Error(400, errors, "BadRequest");
         }
         public static DionResponse BadRequest()

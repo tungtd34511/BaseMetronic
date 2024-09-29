@@ -7,11 +7,12 @@ class HttpService {
      * @returns {Promise<*>}
      */
 
-    getAsync(url) {
+    getAsync(url, data) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: 'GET',
                 url: systemURL + url,
+                data: data,
                 beforeSend: function (xhr) {
                     if (localStorage.Authorization) {
                         xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);

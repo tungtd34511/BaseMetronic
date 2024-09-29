@@ -27,11 +27,11 @@ namespace BaseMetronic.Service.Implement
                 {
                     Token = _tokenService.GenerateToken(account),
                     AccountFullName = account.FullName
-                });
+                },"Đăng nhập thành công");
             }
             else
             {
-                return DionResponse.BadRequest( new string[]{"Tài khoản hoặc mật khẩu không chính xác"});
+                return DionResponse.BadRequest("Đăng nhập thất bại!", new string[]{"Tài khoản hoặc mật khẩu không chính xác"});
             }
         }
 

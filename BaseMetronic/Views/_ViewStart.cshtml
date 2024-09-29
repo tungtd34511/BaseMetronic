@@ -1,3 +1,4 @@
 ﻿@{
     Layout = "_Layout";
+    ViewBag.sidebar_minimize_state = Context.Request.Cookies.ContainsKey("sidebar_minimize_state") && Context.Request.Cookies["sidebar_minimize_state"] == "on" ? "on":"off";
 }

@@ -1,5 +1,6 @@
 ﻿@{
     Layout = null;
+    bool activeSideBar = Context.Request.Cookies.ContainsKey("sidebar_minimize_state") && Context.Request.Cookies["sidebar_minimize_state"] == "on";
 }
 
 <!DOCTYPE html>
@@ -32,6 +33,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
     <!--end::Fonts-->
     <!--begin::Vendor Stylesheets(used for this page only)-->
+    <link href="/admin/assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
     @await RenderSectionAsync("Headers",false)
     <!--end::Vendor Stylesheets-->
     <!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
@@ -45,10 +47,11 @@
         }
         const systemURL = location.origin + "/";
     </script>
+    <script src="~/admin/assets/js/http-service.js" asp-append-version="true"></script>
 </head>
 <!--end::Head-->
 <!--begin::Body-->
-<body id="kt_app_body" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true" data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true" data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default">
+<body id="kt_app_body" data-kt-app-sidebar-minimize="@ViewBag.sidebar_minimize_state" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true" data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true" data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default">
     <!--begin::Theme mode setup on page load-->
     <script>
         var defaultThemeMode = "light";
@@ -73,6 +76,13 @@
         }
     </script>
     <!--end::Theme mode setup on page load-->
+    <div class="page-loader d-flex flex-column justify-content-center align-items-center">
+
+        <div class="d-flex align-items-center mt-5">
+            <span class="spinner-border text-primary" role="status"></span>
+            <span class="text-muted fs-6 fw-semibold ms-5">Đang tải...</span>
+        </div>
+    </div>
     <!--begin::App-->
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
         <!--begin::Page-->
@@ -1857,13 +1867,20 @@
     <!--begin::Global Javascript Bundle(mandatory for all pages)-->
     <script src="/admin/assets/plugins/global/plugins.bundle.js"></script>
     <script src="/admin/assets/js/scripts.bundle.js"></script>
+    <script src="~/admin/assets/js/custom/site.js" asp-append-version="true"></script>
     <!--end::Global Javascript Bundle-->
     <!--begin::Vendors Javascript(used for this page only)-->
     @await RenderSectionAsync("Vendors",false)
+    <script src="/admin/assets/plugins/custom/datatables/datatables.bundle.js"></script>
     <!--end::Vendors Javascript-->
     <!--begin::Custom Javascript(used for this page only)-->
     @await RenderSectionAsync("Custom", false)
     <!--end::Custom Javascript-->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".page-loader").addClass("d-none");
+        })
+    </script>
     <!--end::Javascript-->
 </body>
 <!--end::Body-->

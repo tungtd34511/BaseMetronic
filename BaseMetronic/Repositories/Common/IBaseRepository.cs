@@ -1,4 +1,5 @@
 ﻿using BaseMetronic.Models.Common;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace BaseMetronic.Repositories.Common
 {
@@ -14,5 +15,6 @@ namespace BaseMetronic.Repositories.Common
         Task<T?> GetByIdAsync(params object[] key);
         Task AddAsync(T entity);
         Task<bool> UpdateAsync(T entity);
+        DatabaseFacade GetDatabase();
     }
 }

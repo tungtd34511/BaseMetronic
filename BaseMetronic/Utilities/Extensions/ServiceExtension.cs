@@ -22,7 +22,9 @@ namespace BaseMetronic.Utilities.Extensions
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllersWithViews()
-                .AddNewtonsoftJson(o=> o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                .AddNewtonsoftJson(o=> o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                ;
+            services.AddHttpContextAccessor();
             services.Configure<RouteOptions>(options =>
             {
                 options.LowercaseUrls = true;
@@ -77,6 +79,11 @@ namespace BaseMetronic.Utilities.Extensions
 
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAPILogRepository, APILogRepository>();
+            services.AddScoped<IAPILogService, APILogService>();
+
+            services.AddScoped<IDirectoryItemRepository, DirectoryItemRepository>();
+            services.AddScoped<IDirectoryItemService, DirectoryItemService>();
 
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));

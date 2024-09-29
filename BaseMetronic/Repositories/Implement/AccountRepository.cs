@@ -7,8 +7,10 @@ namespace BaseMetronic.Repositories.Implement
 {
     public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
+        private readonly CRMContext _context;
         public AccountRepository(CRMContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<Account?> Authenticate(string userName, string hashPass)

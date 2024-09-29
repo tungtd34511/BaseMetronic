@@ -1,10 +1,12 @@
-"use strict";
+﻿"use strict";
 
 // Class definition
 var KTFileManagerList = function () {
     // Define shared variables
     var datatable;
     var table
+    var currentFolderId = null;
+    const uploadURL = "/upload";
 
     // Define template element variables
     var uploadTemplate;
@@ -12,6 +14,66 @@ var KTFileManagerList = function () {
     var actionTemplate;
     var checkboxTemplate;
 
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toastr-top-right",
+        "preventDuplicates": false,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
+    const handleAction = function () {
+        $(document).on("click", "[data-action=view]", function (e) {
+            e.preventDefault();
+            let id = $(this).data("id") || null;
+            currentFolderId = id;
+            reload();
+        })
+    }
+
+    const initBreadCum = function (data = []) {
+        let html = '<i class="ki-duotone ki-abstract-32 fs-2 text-primary me-3"><span class="path1"></span><span class="path2"></span></i><a href="#!" data-action="view">Digital Innovation</a>';
+
+        for (var i = data.length - 1; i >= 0; i--) {
+            var item = data[i];
+            if (i == 0) {
+                html += `<i class="ki-duotone ki-right fs-2 text-primary mx-1"></i> ${item.name}`
+            }
+            else {
+                html += `<i class="ki-duotone ki-right fs-2 text-primary mx-1"></i> <a data-action="view" data-id="${item.id}" href="#!">${item.name}</a>`;
+            }
+        }
+        $("#file-manager-container [data-control=breadCum]").html(html);
+
+    }
+
+    const reload = function () {
+        if (datatable) {
+            const filterSearch = document.querySelector('[data-kt-filemanager-table-filter="search"]');
+            datatable.ajax.reload();
+            $(filterSearch).val("").trigger("keyup")
+        }
+    }
+
+    const loading = function (status) {
+        if (status) {
+            $("#file-manager-container>[data-control=loading]").show();
+            $("#file-manager-container").addClass("overlay-block");
+        }
+        else {
+            $("#file-manager-container>[data-control=loading]").hide();
+            $("#file-manager-container").removeClass("overlay-block");
+        }
+    }
 
     // Private functions
     const initTemplates = () => {
@@ -32,62 +94,176 @@ var KTFileManagerList = function () {
             dateCol.setAttribute('data-order', realDate);
         });
 
-        const foldersListOptions = {
-            "info": false,
-            'order': [],
-            "scrollY": "700px",
-            "scrollCollapse": true,
-            "paging": false,
-            'ordering': false,
-            'columns': [
-                { data: 'checkbox' },
-                { data: 'name' },
-                { data: 'size' },
-                { data: 'date' },
-                { data: 'action' },
-            ],
-            'language': {
-                emptyTable: `<div class="d-flex flex-column flex-center">
-                    <img src="${hostUrl}media/illustrations/sketchy-1/5.png" class="mw-400px" />
-                    <div class="fs-1 fw-bolder text-dark">No items found.</div>
-                    <div class="fs-6">Start creating new folders or uploading a new file!</div>
-                </div>`
-            }
-        };
-
         const filesListOptions = {
             "info": false,
-            'order': [],
+            'order': [1, 'asc'],
             'pageLength': 10,
+            paging: true,
             "lengthChange": false,
-            'ordering': false,
             'columns': [
-                { data: 'checkbox' },
-                { data: 'name' },
-                { data: 'size' },
-                { data: 'date' },
-                { data: 'action' },
+                {
+                    data: 'checkbox',
+                    render: function (data, type, row, meta) {
+                        return `<div class="form-check form-check-sm form-check-custom form-check-solid">
+                                    <input class="form-check-input" type="checkbox" value="1" />
+                                </div>`;
+                    }
+                },
+                {
+                    data: 'name',
+                    render: function (data, type, row, meta) {
+                        return `<div class="d-flex align-items-center">
+                                    <span class="icon-wrapper"><i class="ki-duotone ki-folder fs-2x text-primary me-4"><span class="path1"></span><span class="path2"></span></i></span>
+                                    <a href="${uploadURL}${row.path}" data-action="view" data-id="${row.id}" class="text-gray-800 text-hover-primary">${data}</a>
+                                </div>`;
+                    }
+                },
+                {
+                    data: 'size',
+                    render: function (data, type, row, meta) {
+                        return `-`;
+                    }
+                },
+                {
+                    data: 'date',
+                    render: function (data, type, row, meta) {
+                        return `-`;
+                    }
+                },
+                {
+                    data: 'action',
+                    render: function (data, type, row, meta) {
+                        var sharePath = location.origin + uploadURL + row.path;
+                        return `<div class="d-flex justify-content-end">
+                                    <!--begin::Share link-->
+                                    <div class="ms-2" data-kt-filemanger-table="copy_link">
+                                        <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                            <i class="ki-duotone ki-fasten fs-5 m-0"><span class="path1"></span><span class="path2"></span></i>
+                                        </button>
+                                        <!--begin::Menu-->
+                                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-300px" data-kt-menu="true">
+                                            <!--begin::Card-->
+                                            <div class="card card-flush">
+                                                <div class="card-body p-5">
+                                                    <!--begin::Loader-->
+                                                    <div class="d-flex" data-kt-filemanger-table="copy_link_generator">
+                                                        <!--begin::Spinner-->
+                                                        <div class="me-5" data-kt-indicator="on">
+                                                            <span class="indicator-progress">
+                                                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                                                            </span>
+                                                        </div>
+                                                        <!--end::Spinner-->
+                                                        <!--begin::Label-->
+                                                        <div class="fs-6 text-gray-900">Tạo liên kết chia sẻ...</div>
+                                                        <!--end::Label-->
+                                                    </div>
+                                                    <!--end::Loader-->
+                                                    <!--begin::Link-->
+                                                    <div class="d-flex flex-column text-start d-none" data-kt-filemanger-table="copy_link_result">
+                                                        <div class="d-flex mb-3">
+                                                            <i class="ki-duotone ki-check fs-2 text-success me-3"></i>                    <div class="fs-6 text-gray-900">Chia sẻ liên kết được tạo</div>
+                                                        </div>
+                                                        <div class="d-flex">
+                                                            <input type="text" class="form-control form-control-sm  me-3 flex-grow-1 " readonly value="${sharePath}" />
+                                                            <!--begin::Button-->
+                                                            <button class="btn btn-sm btn-icon btn-light btn-active-light-primary flex-shrink-0" data-clipboard-target="#kt_clipboard_4">
+                                                                <i class="ki-duotone ki-copy fs-2 m-0 text-muted"></i>
+                                                            </button>
+                                                            <!--end::Button-->
+                                                        </div>
+                                                        <div class="text-muted fw-normal mt-2 fs-8 px-3">Chỉ đọc. <a href="/admin/apps/file-manager/settings/.html" class="ms-2">Thay đổi quyền</a></div>
+                                                    </div>
+                                                    <!--end::Link-->
+                                                </div>
+                                            </div>
+                                            <!--end::Card-->
+                                        </div>
+                                        <!--end::Menu-->                                    <!--end::Share link-->
+                                    </div>
+
+                                    <!--begin::More-->
+                                    <div class="ms-2">
+                                        <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary me-2" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                            <i class="ki-duotone ki-dots-square fs-5 m-0"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                        </button>
+                                        <!--begin::Menu-->
+                                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4" data-kt-menu="true">
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="${row.path}" data-action="view" data-id="${row.id}" class="menu-link px-3">
+                                                    Xem
+                                                </a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="#" class="menu-link px-3" data-kt-filemanager-table="rename">
+                                                    Rename
+                                                </a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="#" class="menu-link px-3">
+                                                    Download Folder
+                                                </a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="#" class="menu-link px-3" data-kt-filemanager-table-filter="move_row" data-bs-toggle="modal" data-bs-target="#kt_modal_move_to_folder">
+                                                    Move to folder
+                                                </a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="#" class="menu-link text-danger px-3" data-id="${row.id}" data-kt-filemanager-table-filter="delete_row">
+                                                    Xóa
+                                                </a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                        </div>
+                                        <!--end::Menu-->                                    <!--end::More-->
+                                    </div>
+                                </div>`;
+                    }
+                },
             ],
-            'language': {
-                emptyTable: `<div class="d-flex flex-column flex-center">
-                    <img src="${hostUrl}media/illustrations/sketchy-1/5.png" class="mw-400px" />
-                    <div class="fs-1 fw-bolder text-dark mb-4">No items found.</div>
-                    <div class="fs-6">Start creating new folders or uploading a new file!</div>
-                </div>`
+
+            language: {
+                url: '/admin/assets/plugins/custom/datatables/vietnamese.json',
             },
-            conditionalPaging: true
+            ajax: {
+                dataSrc: function (res) {
+                    if (res.isSucceeded) {
+                        initBreadCum(res.resources.parents || []);
+                    }
+                    return res.resources.childrens;
+                },
+                url: '/file-manager/api/list',
+                beforeSend: function (xhr) {
+                    if (localStorage.Authorization) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
+                    }
+                },
+                data: function (d) {
+                    return {
+                        viewMode: $("#file-header-tab a.active").data("mode") || undefined,
+                        parentId: currentFolderId,
+                    }
+                },
+                type: 'GET'
+            },
+            columnDefs: [
+                { orderable: false, targets: [-1, 0] },
+            ]
         };
 
-        // Define datatable options to load
-        var loadOptions;
-        if (table.getAttribute('data-kt-filemanager-table') === 'folders') {
-            loadOptions = foldersListOptions;
-        } else {
-            loadOptions = filesListOptions;
-        }
 
         // Init datatable --- more info on datatables: https://datatables.net/manual/
-        datatable = $(table).DataTable(loadOptions);
+        datatable = $(table).DataTable(filesListOptions);
 
         // Re-init functions on every table re-draw -- more info: https://datatables.net/reference/event/draw
         datatable.on('draw', function () {
@@ -119,45 +295,67 @@ var KTFileManagerList = function () {
             // Delete button on click
             d.addEventListener('click', function (e) {
                 e.preventDefault();
-
                 // Select parent row
                 const parent = e.target.closest('tr');
-
+                let id = $(d).data("id");
                 // Get customer name
                 const fileName = parent.querySelectorAll('td')[1].innerText;
 
                 // SweetAlert2 pop up --- official docs reference: https://sweetalert2.github.io/
                 Swal.fire({
-                    text: "Are you sure you want to delete " + fileName + "?",
+                    text: "Bạn có chắc chắn muốn xóa " + fileName + "?",
                     icon: "warning",
                     showCancelButton: true,
                     buttonsStyling: false,
-                    confirmButtonText: "Yes, delete!",
-                    cancelButtonText: "No, cancel",
+                    confirmButtonText: "Có",
+                    cancelButtonText: "Không",
                     customClass: {
                         confirmButton: "btn fw-bold btn-danger",
                         cancelButton: "btn fw-bold btn-active-light-primary"
                     }
-                }).then(function (result) {
+                }).then(async function (result) {
                     if (result.value) {
-                        Swal.fire({
-                            text: "You have deleted " + fileName + "!.",
-                            icon: "success",
-                            buttonsStyling: false,
-                            confirmButtonText: "Ok, got it!",
-                            customClass: {
-                                confirmButton: "btn fw-bold btn-primary",
+                        try {
+                            var res = await httpService.deleteAsync("file-manager/api/delete/" + id);
+                            if (res.isSucceeded) {
+                                Swal.fire({
+                                    text: "Bạn đã xóa " + fileName + "!.",
+                                    icon: "success",
+                                    buttonsStyling: false,
+                                    customClass: {
+                                        confirmButton: "btn fw-bold btn-primary",
+                                    }
+                                }).then(function () {
+                                    reload();
+                                });
                             }
-                        }).then(function () {
-                            // Remove current row
-                            datatable.row($(parent)).remove().draw();
-                        });
+                            else {
+                                Swal.fire({
+                                    text: "Đã có lỗi xảy ra, xin vui lòng thử lại sau!",
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    customClass: {
+                                        confirmButton: "btn fw-bold btn-primary",
+                                    }
+                                });
+                            }
+                            
+                        } catch (e) {
+                            console.warn(e);
+                            Swal.fire({
+                                text: "Đã có lỗi xảy ra, xin vui lòng thử lại sau!",
+                                icon: "error",
+                                buttonsStyling: false,
+                                customClass: {
+                                    confirmButton: "btn fw-bold btn-primary",
+                                }
+                            });
+                        }
                     } else if (result.dismiss === 'cancel') {
                         Swal.fire({
-                            text: customerName + " was not deleted.",
+                            text: fileName + " đã không bị xóa.",
                             icon: "error",
                             buttonsStyling: false,
-                            confirmButtonText: "Ok, got it!",
                             customClass: {
                                 confirmButton: "btn fw-bold btn-primary",
                             }
@@ -310,7 +508,11 @@ var KTFileManagerList = function () {
                         'new_folder_name': {
                             validators: {
                                 notEmpty: {
-                                    message: 'Folder name is required'
+                                    message: 'Tên thư mục không được để trống'
+                                },
+                                regexp: {
+                                    regexp: /^(?!\s)(?!.*[\\/:\*\?"<>\|])[^ ]{1,255}(?<!\s)$/,
+                                    message: 'Tên thư mục không chứa các ký tự đặc biệt như: /, \\, :, *, ?, ", <, >, |, khoảng trắng ở đầu và cuối tên và có độ dài giới hạn là 255 ký tự.'
                                 }
                             }
                         },
@@ -335,69 +537,34 @@ var KTFileManagerList = function () {
 
                 // Validate form before submit
                 if (validator) {
-                    validator.validate().then(function (status) {
+                    validator.validate().then(async function (status) {
                         console.log('validated!');
 
                         if (status == 'Valid') {
                             // Simulate process for demo only
-                            setTimeout(function () {
-                                // Create folder link
-                                const folderLink = document.createElement('a');
-                                const folderLinkClasses = ['text-gray-800', 'text-hover-primary'];
-                                folderLink.setAttribute('href', '?page=apps/file-manager/blank');
-                                folderLink.classList.add(...folderLinkClasses);
-                                folderLink.innerText = rowInput.value;
-
-                                const newRow = datatable.row.add({
-                                    'checkbox': checkboxTemplate.innerHTML,
-                                    'name': folderIcon.outerHTML + folderLink.outerHTML,
-                                    "size": '-',
-                                    "date": '-',
-                                    'action': actionTemplate.innerHTML
-                                }).node();
-                                $(newRow).find('td').eq(4).attr('data-kt-filemanager-table', 'action_dropdown');
-                                $(newRow).find('td').eq(4).addClass('text-end'); // Add custom class to last 'td' element --- more info: https://datatables.net/forums/discussion/22341/row-add-cell-class
-
-                                // Re-sort datatable to allow new folder added at the top
-                                var index = datatable.row(0).index(),
-                                    rowCount = datatable.data().length - 1,
-                                    insertedRow = datatable.row(rowCount).data(),
-                                    tempRow;
-
-                                for (var i = rowCount; i > index; i--) {
-                                    tempRow = datatable.row(i - 1).data();
-                                    datatable.row(i).data(tempRow);
-                                    datatable.row(i - 1).data(insertedRow);
-                                }
-
-                                toastr.options = {
-                                    "closeButton": true,
-                                    "debug": false,
-                                    "newestOnTop": false,
-                                    "progressBar": false,
-                                    "positionClass": "toastr-top-right",
-                                    "preventDuplicates": false,
-                                    "showDuration": "300",
-                                    "hideDuration": "1000",
-                                    "timeOut": "5000",
-                                    "extendedTimeOut": "1000",
-                                    "showEasing": "swing",
-                                    "hideEasing": "linear",
-                                    "showMethod": "fadeIn",
-                                    "hideMethod": "fadeOut"
+                            try {
+                                var obj = {
+                                    "name": rowInput.value.trim(),
+                                    "parentId": currentFolderId
                                 };
-
-                                toastr.success(rowInput.value + ' was created!');
-
+                                var res = await httpService.postAsync("file-manager/api/add-folder", obj);
+                                if (res.isSucceeded) {
+                                    toastr.success('Thư mục ' + rowInput.value + ' đã được thêm mới thành công!');
+                                    // Reset input
+                                    rowInput.value = '';
+                                    reload();
+                                }
+                                else {
+                                    toastr.error('Đã có lỗi xảy ra khi tạo thư mục mới! Xin vui lòng thử lại sau!');
+                                }
+                            } catch (e) {
+                                console.warn(e);
+                                toastr.error('Đã có lỗi xảy ra khi tạo thư mục mới! Xin vui lòng thử lại sau!');
+                            }
+                            finally {
                                 // Disable indicator
                                 rowButton.removeAttribute("data-kt-indicator");
-
-                                // Reset input
-                                rowInput.value = '';
-
-                                datatable.draw(false);
-
-                            }, 2000);
+                            }
                         } else {
                             // Disable indicator
                             rowButton.removeAttribute("data-kt-indicator");
@@ -417,25 +584,7 @@ var KTFileManagerList = function () {
                     // Disable indicator
                     cancelButton.removeAttribute("data-kt-indicator");
 
-                    // Toggle toastr
-                    toastr.options = {
-                        "closeButton": true,
-                        "debug": false,
-                        "newestOnTop": false,
-                        "progressBar": false,
-                        "positionClass": "toastr-top-right",
-                        "preventDuplicates": false,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "5000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    };
-
-                    toastr.error('Cancelled new folder creation');
+                    toastr.error('Đã hủy việc tạo thư mục mới!');
                     resetNewFolder();
                 }, 1000);
             });
@@ -453,7 +602,7 @@ var KTFileManagerList = function () {
 
     // Handle rename file or folder
     const handleRename = () => {
-        const renameButton = table.querySelectorAll('[data-kt-filemanager-table="rename"]');     
+        const renameButton = table.querySelectorAll('[data-kt-filemanager-table="rename"]');
 
         renameButton.forEach(button => {
             button.addEventListener('click', renameCallback);
@@ -776,7 +925,53 @@ var KTFileManagerList = function () {
             const generator = el.querySelector('[data-kt-filemanger-table="copy_link_generator"]');
             const result = el.querySelector('[data-kt-filemanger-table="copy_link_result"]');
             const input = el.querySelector('input');
+            const buttonCopy = input.nextElementSibling;
 
+            buttonCopy.addEventListener("click", e => {
+                e.preventDefault();
+                navigator.clipboard.writeText(input.value);
+                var checkIcon = buttonCopy.querySelector('.ki-check');
+                var copyIcon = buttonCopy.querySelector('.ki-copy');
+
+                // Exit check icon when already showing
+                if (checkIcon) {
+                    return;
+                }
+
+                // Create check icon
+                checkIcon = document.createElement('i');
+                checkIcon.classList.add('ki-duotone');
+                checkIcon.classList.add('ki-check');
+                checkIcon.classList.add('fs-2x');
+
+                // Append check icon
+                buttonCopy.appendChild(checkIcon);
+
+                // Highlight target
+                const classes = ['text-success', 'fw-boldest'];
+                input.classList.add(...classes);
+
+                // Highlight button
+                buttonCopy.classList.add('btn-success');
+
+                // Hide copy icon
+                copyIcon.classList.add('d-none');
+
+                // Revert button label after 3 seconds
+                setTimeout(function () {
+                    // Remove check icon
+                    copyIcon.classList.remove('d-none');
+
+                    // Revert icon
+                    buttonCopy.removeChild(checkIcon);
+
+                    // Remove target highlight
+                    input.classList.remove(...classes);
+
+                    // Remove button highlight
+                    buttonCopy.classList.remove('btn-success');
+                }, 3000)
+            })
             // Click action
             button.addEventListener('click', e => {
                 e.preventDefault();
@@ -791,6 +986,7 @@ var KTFileManagerList = function () {
                     generator.classList.add('d-none');
                     result.classList.remove('d-none');
                     input.select();
+                    navigator.clipboard.writeText(input.value);
                 }, 2000);
             });
         });
@@ -855,24 +1051,7 @@ var KTFileManagerList = function () {
                             }).then(function (result) {
                                 if (result.isConfirmed) {
                                     form.reset(); // Reset form	
-                                    moveModal.hide(); // Hide modal			
-
-                                    toastr.options = {
-                                        "closeButton": true,
-                                        "debug": false,
-                                        "newestOnTop": false,
-                                        "progressBar": false,
-                                        "positionClass": "toastr-top-right",
-                                        "preventDuplicates": false,
-                                        "showDuration": "300",
-                                        "hideDuration": "1000",
-                                        "timeOut": "5000",
-                                        "extendedTimeOut": "1000",
-                                        "showEasing": "swing",
-                                        "hideEasing": "linear",
-                                        "showMethod": "fadeIn",
-                                        "hideMethod": "fadeOut"
-                                    };
+                                    moveModal.hide(); // Hide modal		
 
                                     toastr.success('1 item has been moved.');
 
@@ -928,6 +1107,7 @@ var KTFileManagerList = function () {
             handleRename();
             handleMoveToFolder();
             countTotalItems();
+            handleAction();
             KTMenu.createInstances();
         }
     }

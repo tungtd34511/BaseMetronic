@@ -11,7 +11,7 @@ namespace BaseMetronic.Controllers.Core
     {
         private readonly IAccountService _service;
         private readonly ILogger _logger;
-        public AccountController(IAccountService service, ILoggerFactory loggerFactory) : base(service, loggerFactory)
+        public AccountController(IAccountService service, ILoggerFactory loggerFactory, IAPILogService aPILogService) : base(service,aPILogService, loggerFactory)
         {
             _service = service;
             _logger = loggerFactory.CreateLogger<AccountController>();

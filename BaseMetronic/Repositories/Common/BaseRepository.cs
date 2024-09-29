@@ -1,6 +1,7 @@
 ﻿using BaseMetronic.Models.Common;
 using BaseMetronic.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace BaseMetronic.Repositories.Common
 {
@@ -12,7 +13,7 @@ namespace BaseMetronic.Repositories.Common
     /// <typeparam name="T">Type of entity</typeparam>
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        public readonly CRMContext _context;
+        private readonly CRMContext _context;
 
         public BaseRepository(CRMContext context)
         {
@@ -33,6 +34,11 @@ namespace BaseMetronic.Repositories.Common
         public async Task<T?> GetByIdAsync(params object[] key)
         {
             return await _context.Set<T>().FindAsync(key);
+        }
+
+        public DatabaseFacade GetDatabase()
+        {
+            return _context.Database;
         }
 
         public async Task<bool> UpdateAsync(T entity)
