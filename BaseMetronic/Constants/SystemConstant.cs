@@ -15,7 +15,7 @@
             /// <summary>
             /// Tên thư mục không chứa các ký tự đặc biệt như: /, \\, :, *, ?, ", <, >, |, khoảng trắng ở đầu và cuối tên và có độ dài giới hạn là 255 ký tự.
             /// </summary>
-            public const string DirectoryItem = @"^(?!\s)(?!.*[\\/:\*\?""<>\|])[^ ]{1,255}(?<!\s)$";
+            public const string DirectoryItem = @"^(?!\s)(?!.*[\\/:\*\?""<>\|]).{1,255}(?<!\s)$";
         }
         public struct ClaimNames
         {

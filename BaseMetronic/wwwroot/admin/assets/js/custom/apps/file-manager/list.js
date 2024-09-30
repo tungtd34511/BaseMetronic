@@ -6,6 +6,7 @@ var KTFileManagerList = function () {
     var datatable;
     var table
     var currentFolderId = null;
+    var currentTargetId = null;
     const uploadURL = "/upload";
 
     // Define template element variables
@@ -198,8 +199,8 @@ var KTFileManagerList = function () {
                                             <!--end::Menu item-->
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3" data-kt-filemanager-table="rename">
-                                                    Rename
+                                                <a href="#" class="menu-link px-3" data-kt-filemanager-table="rename" data-id="${row.id}">
+                                                    Đổi tên
                                                 </a>
                                             </div>
                                             <!--end::Menu item-->
@@ -274,7 +275,6 @@ var KTFileManagerList = function () {
             KTMenu.createInstances();
             initCopyLink();
             countTotalItems();
-            handleRename();
         });
     }
 
@@ -339,7 +339,7 @@ var KTFileManagerList = function () {
                                     }
                                 });
                             }
-                            
+
                         } catch (e) {
                             console.warn(e);
                             Swal.fire({
@@ -511,7 +511,7 @@ var KTFileManagerList = function () {
                                     message: 'Tên thư mục không được để trống'
                                 },
                                 regexp: {
-                                    regexp: /^(?!\s)(?!.*[\\/:\*\?"<>\|])[^ ]{1,255}(?<!\s)$/,
+                                    regexp: /^(?!\s)(?!.*[\\/:\*\?"<>\|])[^]{1,255}(?<!\s)$/,
                                     message: 'Tên thư mục không chứa các ký tự đặc biệt như: /, \\, :, *, ?, ", <, >, |, khoảng trắng ở đầu và cuối tên và có độ dài giới hạn là 255 ký tự.'
                                 }
                             }
@@ -602,181 +602,183 @@ var KTFileManagerList = function () {
 
     // Handle rename file or folder
     const handleRename = () => {
-        const renameButton = table.querySelectorAll('[data-kt-filemanager-table="rename"]');
+        $(document).on("click","[data-kt-filemanager-table=rename]", function (e) {
+            e.preventDefault();
+            currentTargetId = $(this).data("id");
+            if (!currentTargetId) {
+                return;
+            }
+            // Define shared value
+            let nameValue;
+            let path;
 
-        renameButton.forEach(button => {
-            button.addEventListener('click', renameCallback);
-        });
-    }
 
-    // Rename callback
-    const renameCallback = (e) => {
-        e.preventDefault();
+            // Stop renaming if there's an input existing
+            if (table.querySelectorAll('#kt_file_manager_rename_input').length > 0) {
+                console.log(table.querySelectorAll('#kt_file_manager_rename_input'));
+                Swal.fire({
+                    text: "Thư mục chưa được lưu. Vui lòng lưu hoặc hủy.",
+                    icon: "warning",
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: "btn fw-bold btn-danger"
+                    }
+                });
 
-        // Define shared value
-        let nameValue;
+                return;
+            }
 
-        // Stop renaming if there's an input existing
-        if (table.querySelectorAll('#kt_file_manager_rename_input').length > 0) {
-            Swal.fire({
-                text: "Unsaved input detected. Please save or cancel the current item",
-                icon: "warning",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, got it!",
-                customClass: {
-                    confirmButton: "btn fw-bold btn-danger"
+            // Select parent row
+            const parent = e.target.closest('tr');
+
+            // Get name column
+            const nameCol = parent.querySelectorAll('td')[1];
+            const colIcon = nameCol.querySelector('.icon-wrapper');
+            nameValue = nameCol.innerText;
+            path = nameCol.querySelector("a").href;
+
+            // Set rename input template
+            const renameInput = renameTemplate.cloneNode(true);
+            renameInput.querySelector('#kt_file_manager_rename_folder_icon').innerHTML = colIcon.outerHTML;
+
+            // Swap current column content with input template
+            nameCol.innerHTML = renameInput.innerHTML;
+
+            // Set input value with current file/folder name
+            parent.querySelector('#kt_file_manager_rename_input').value = nameValue;
+
+            // Rename file / folder validator
+            var renameValidator = FormValidation.formValidation(
+                nameCol,
+                {
+                    fields: {
+                        'rename_folder_name': {
+                            validators: {
+                                notEmpty: {
+                                    message: 'Tên không được để trống'
+                                },
+                                regexp: {
+                                    regexp: /^(?!\s)(?!.*[\\/:\*\?"<>\|])[^]{1,255}(?<!\s)$/,
+                                    message: 'Tên thư mục không chứa các ký tự đặc biệt như: /, \\, :, *, ?, ", <, >, |, khoảng trắng ở đầu và cuối tên và có độ dài giới hạn là 255 ký tự.'
+                                }
+                            }
+                        },
+                    },
+                    plugins: {
+                        trigger: new FormValidation.plugins.Trigger(),
+                        bootstrap: new FormValidation.plugins.Bootstrap5({
+                            rowSelector: '.fv-row',
+                            eleInvalidClass: '',
+                            eleValidClass: ''
+                        })
+                    }
+                }
+            );
+
+            // Rename input button action
+            const renameInputButton = document.querySelector('#kt_file_manager_rename_folder');
+            renameInputButton.addEventListener('click', e => {
+                e.preventDefault();
+
+                // Detect if valid
+                if (renameValidator) {
+                    renameValidator.validate().then(function (status) {
+                        if (status == 'Valid') {
+
+                            const newValue = document.querySelector('#kt_file_manager_rename_input').value;
+
+                            // Pop up confirmation
+                            Swal.fire({
+                                text: "Bạn có chắc chắn muốn đổi tên " + nameValue + "?",
+                                icon: "warning",
+                                showCancelButton: true,
+                                buttonsStyling: false,
+                                customClass: {
+                                    confirmButton: "btn fw-bold btn-danger",
+                                    cancelButton: "btn fw-bold btn-active-light-primary"
+                                }
+                            }).then(async function (result) {
+                                if (result.value) {
+                                    try {
+                                        var res = await httpService.putAsync("file-manager/api/rename-folder", {
+                                            id: currentTargetId,
+                                            name: newValue
+                                        })
+                                        if (res.isSucceeded) {
+                                            Swal.fire({
+                                                text: "Bạn đã đổi tên thư mục " + nameValue + "!.",
+                                                icon: "success",
+                                                buttonsStyling: false,
+                                                customClass: {
+                                                    confirmButton: "btn fw-bold btn-primary",
+                                                }
+                                            }).then(function () {
+                                                // Draw datatable with new content -- Add more events here for any server-side events
+                                                datatable.cell($(nameCol)).data(newValue).draw();
+                                            });
+                                        }
+                                        else {
+                                            Swal.fire({
+                                                text: "Đã có lỗi xảy ra khi thực hiện đổi tên thư mục, vui long thử lại sau!",
+                                                icon: "error",
+                                                buttonsStyling: false,
+                                                customClass: {
+                                                    confirmButton: "btn fw-bold btn-primary",
+                                                }
+                                            });
+                                        }
+                                    } catch (e) {
+                                        console.warn(e);
+                                        Swal.fire({
+                                            text: "Đã có lỗi xảy ra khi thực hiện đổi tên thư mục, vui long thử lại sau!",
+                                            icon: "error",
+                                            buttonsStyling: false,
+                                            customClass: {
+                                                confirmButton: "btn fw-bold btn-primary",
+                                            }
+                                        });
+                                    }
+                                } else if (result.dismiss === 'cancel') {
+                                    Swal.fire({
+                                        text: nameValue + " was not renamed.",
+                                        icon: "error",
+                                        buttonsStyling: false,
+                                        confirmButtonText: "Ok, got it!",
+                                        customClass: {
+                                            confirmButton: "btn fw-bold btn-primary",
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 }
             });
 
-            return;
-        }
+            // Cancel rename input
+            const cancelInputButton = document.querySelector('#kt_file_manager_rename_folder_cancel');
+            cancelInputButton.addEventListener('click', e => {
+                e.preventDefault();
 
-        // Select parent row
-        const parent = e.target.closest('tr');
+                // Simulate process for demo only
+                cancelInputButton.setAttribute("data-kt-indicator", "on");
 
-        // Get name column
-        const nameCol = parent.querySelectorAll('td')[1];
-        const colIcon = nameCol.querySelector('.icon-wrapper');
-        nameValue = nameCol.innerText;
-
-        // Set rename input template
-        const renameInput = renameTemplate.cloneNode(true);
-        renameInput.querySelector('#kt_file_manager_rename_folder_icon').innerHTML = colIcon.outerHTML;
-
-        // Swap current column content with input template
-        nameCol.innerHTML = renameInput.innerHTML;
-
-        // Set input value with current file/folder name
-        parent.querySelector('#kt_file_manager_rename_input').value = nameValue;
-
-        // Rename file / folder validator
-        var renameValidator = FormValidation.formValidation(
-            nameCol,
-            {
-                fields: {
-                    'rename_folder_name': {
-                        validators: {
-                            notEmpty: {
-                                message: 'Name is required'
-                            }
-                        }
-                    },
-                },
-                plugins: {
-                    trigger: new FormValidation.plugins.Trigger(),
-                    bootstrap: new FormValidation.plugins.Bootstrap5({
-                        rowSelector: '.fv-row',
-                        eleInvalidClass: '',
-                        eleValidClass: ''
-                    })
-                }
-            }
-        );
-
-        // Rename input button action
-        const renameInputButton = document.querySelector('#kt_file_manager_rename_folder');
-        renameInputButton.addEventListener('click', e => {
-            e.preventDefault();
-
-            // Detect if valid
-            if (renameValidator) {
-                renameValidator.validate().then(function (status) {
-                    console.log('validated!');
-
-                    if (status == 'Valid') {
-                        // Pop up confirmation
-                        Swal.fire({
-                            text: "Are you sure you want to rename " + nameValue + "?",
-                            icon: "warning",
-                            showCancelButton: true,
-                            buttonsStyling: false,
-                            confirmButtonText: "Yes, rename it!",
-                            cancelButtonText: "No, cancel",
-                            customClass: {
-                                confirmButton: "btn fw-bold btn-danger",
-                                cancelButton: "btn fw-bold btn-active-light-primary"
-                            }
-                        }).then(function (result) {
-                            if (result.value) {
-                                Swal.fire({
-                                    text: "You have renamed " + nameValue + "!.",
-                                    icon: "success",
-                                    buttonsStyling: false,
-                                    confirmButtonText: "Ok, got it!",
-                                    customClass: {
-                                        confirmButton: "btn fw-bold btn-primary",
-                                    }
-                                }).then(function () {
-                                    // Get new file / folder name value
-                                    const newValue = document.querySelector('#kt_file_manager_rename_input').value;
-
-                                    // New column data template
-                                    const newData = `<div class="d-flex align-items-center">
-                                        ${colIcon.outerHTML}
-                                        <a href="?page=apps/file-manager/files/" class="text-gray-800 text-hover-primary">${newValue}</a>
-                                    </div>`;
-
-                                    // Draw datatable with new content -- Add more events here for any server-side events
-                                    datatable.cell($(nameCol)).data(newData).draw();
-                                });
-                            } else if (result.dismiss === 'cancel') {
-                                Swal.fire({
-                                    text: nameValue + " was not renamed.",
-                                    icon: "error",
-                                    buttonsStyling: false,
-                                    confirmButtonText: "Ok, got it!",
-                                    customClass: {
-                                        confirmButton: "btn fw-bold btn-primary",
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        // Cancel rename input
-        const cancelInputButton = document.querySelector('#kt_file_manager_rename_folder_cancel');
-        cancelInputButton.addEventListener('click', e => {
-            e.preventDefault();
-
-            // Simulate process for demo only
-            cancelInputButton.setAttribute("data-kt-indicator", "on");
-
-            setTimeout(function () {
-                const revertTemplate = `<div class="d-flex align-items-center">
-                    ${colIcon.outerHTML}
-                    <a href="?page=apps/file-manager/files/" class="text-gray-800 text-hover-primary">${nameValue}</a>
+                setTimeout(function () {
+                    const revertTemplate = `<div class="d-flex align-items-center">
+                    <a href="${path}" class="text-gray-800 text-hover-primary">${nameValue}</a>
                 </div>`;
 
-                // Remove spinner
-                cancelInputButton.removeAttribute("data-kt-indicator");
+                    // Remove spinner
+                    cancelInputButton.removeAttribute("data-kt-indicator");
 
-                // Draw datatable with new content -- Add more events here for any server-side events
-                datatable.cell($(nameCol)).data(revertTemplate).draw();
+                    // Draw datatable with new content -- Add more events here for any server-side events
+                    datatable.cell($(nameCol)).data(nameValue).draw();
 
-                // Toggle toastr
-                toastr.options = {
-                    "closeButton": true,
-                    "debug": false,
-                    "newestOnTop": false,
-                    "progressBar": false,
-                    "positionClass": "toastr-top-right",
-                    "preventDuplicates": false,
-                    "showDuration": "300",
-                    "hideDuration": "1000",
-                    "timeOut": "5000",
-                    "extendedTimeOut": "1000",
-                    "showEasing": "swing",
-                    "hideEasing": "linear",
-                    "showMethod": "fadeIn",
-                    "hideMethod": "fadeOut"
-                };
-
-                toastr.error('Cancelled rename function');
-            }, 1000);
-        });
+                    toastr.error('Đã hủy chức năng đổi tên');
+                    $(renameInput).remove();
+                }, 1000);
+            });
+        })
     }
 
     // Init dropzone
@@ -948,7 +950,7 @@ var KTFileManagerList = function () {
                 buttonCopy.appendChild(checkIcon);
 
                 // Highlight target
-                const classes = ['text-success', 'fw-boldest'];
+                const classes = ['bg-success', 'text-white', 'fw-boldest'];
                 input.classList.add(...classes);
 
                 // Highlight button
@@ -1104,10 +1106,10 @@ var KTFileManagerList = function () {
             handleNewFolder();
             initDropzone();
             initCopyLink();
-            handleRename();
             handleMoveToFolder();
             countTotalItems();
             handleAction();
+            handleRename();
             KTMenu.createInstances();
         }
     }

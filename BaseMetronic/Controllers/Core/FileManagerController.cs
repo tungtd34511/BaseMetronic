@@ -85,5 +85,22 @@ namespace BaseMetronic.Controllers.Core
                 return BadRequest();
             }
         }
+
+        [HttpPut("api/rename-folder")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> RenameFolder([FromBody]RenameDirectoryItemDTO model)
+        {
+            try
+            {
+                var res = await _directoryItemService.RenameFolder(model);
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Some thing wrong when RenameFolder([FromBody]RenameDirectoryItemDTO model)");
+                return BadRequest();
+            }
+        }
+        
     }
 }

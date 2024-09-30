@@ -30,13 +30,14 @@ namespace BaseMetronic.Configurations.Common
     {
         public override void Configure(EntityTypeBuilder<T> builder)
         {
-            base.Configure(builder);
 
             builder.Property(e => e.Name)
                .HasMaxLength(255);
 
             builder.Property(e => e.Description)
                 .HasMaxLength(500);
+
+            base.Configure(builder);
         }
     }
 }

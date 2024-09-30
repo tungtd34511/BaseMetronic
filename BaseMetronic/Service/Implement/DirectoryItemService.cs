@@ -82,6 +82,27 @@ namespace BaseMetronic.Service.Implement
             return DionResponse.Success(data);
         }
 
+        public async Task<DionResponse> RenameFolder(RenameDirectoryItemDTO model)
+        {
+            var item = await _directoryItemRepository.GetByIdAsync(model.Id);
+            if(item == null)
+            {
+                throw new Exception("Not found folder");
+            }
+            if(item.Name != model.Name)
+            {
+                string rootFolderPath = GetRootFolderPath();
+                string folderFullName = string.Join("",rootFolderPath.GetFolderFormatPath(), item.Path);
+                string folderParentName = Path.GetDirectoryName(folderFullName)?? string.Empty;
+                folderFullName = Path.Combine(folderParentName, model.Name);
+                folderFullName = folderFullName.GetValidFolderName();
+                string newFolderName = Path.GetFileName(folderFullName);
+                item.Name = newFolderName;
+                await _directoryItemRepository.UpdateAsync(item);
+            }
+            return DionResponse.Success("Đổi tên thư mục thành công!");
+        }
+
         /// <summary>
         /// Author: TUNGTD
         /// Created: 30/07/2023
