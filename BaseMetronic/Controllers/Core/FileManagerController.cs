@@ -101,6 +101,11 @@ namespace BaseMetronic.Controllers.Core
                 return BadRequest();
             }
         }
-        
+
+        [Route("demo")]
+        public IActionResult Demo()
+        {
+            return View();
+        }
     }
 }
