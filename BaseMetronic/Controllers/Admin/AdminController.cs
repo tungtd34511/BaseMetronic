@@ -7,11 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace BaseMetronic.Controllers.Admin
 {
     [Route("[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AdminController : BaseController
     {
         [Route("")]
+        public IActionResult Default()
+        {
+            return RedirectToAction("Index");
+        }
+
         [Route("index")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Index()
         {
             return View();
@@ -60,11 +65,19 @@ namespace BaseMetronic.Controllers.Admin
             return View();
         }
         #endregion
-
+        #region Errors
         [Route("error-404")]
         public IActionResult Error404()
         {
             return View();
         }
+        #endregion
+        #region Dashboards
+        [Route("landing")]
+        public IActionResult Landing()
+        {
+            return View();
+        }
+        #endregion 
     }
 }
