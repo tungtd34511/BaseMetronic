@@ -101,6 +101,21 @@ namespace BaseMetronic.Controllers.Core
                 return BadRequest();
             }
         }
-        
+
+        [HttpGet("api/list-folder")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> ListFolder()
+        {
+            try
+            {
+                var res = await _directoryItemService.List(true);
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Some thing wrong when Task<IActionResult> ListFolder()");
+                return BadRequest();
+            }
+        } 
     }
 }

@@ -8,5 +8,6 @@ namespace BaseMetronic.Repositories.Interface
     {
         Task<FileManagerInfoVM> GetInfo();
         Task<DirectoryItemResponse> List(DirectoryItemRequest request);
+        Task<List<DirectoryItemDetail>> List(bool isOnlyFolder = false);
     }
 }

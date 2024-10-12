@@ -1,4 +1,5 @@
 ﻿using BaseMetronic.Models.Common;
+using Newtonsoft.Json;
 
 namespace BaseMetronic.Models.Entities
 {
@@ -9,10 +10,12 @@ namespace BaseMetronic.Models.Entities
         public string Path { get; set; } = string.Empty;
         public bool IsDirectory { get; set; }
         public int? ParentId { get; set; }
-        public string TreeIds { get; set; } = string.Empty;
         public int? AuthorId { get; set; }
+        [JsonIgnore]
         public virtual Account? Account { get; set; }
+        [JsonIgnore]
         public virtual DirectoryItem? ParentItem { get; set; }
+        [JsonIgnore]
         public virtual ICollection<DirectoryItem> ChildrenItems { get; set; } = new List<DirectoryItem>();
     }
 }

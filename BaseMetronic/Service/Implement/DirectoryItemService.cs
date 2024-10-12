@@ -7,6 +7,7 @@ using BaseMetronic.Service.Interface;
 using BaseMetronic.Utilities;
 using BaseMetronic.Utilities.Extensions;
 using BaseMetronic.ViewModels.FileManagers;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BaseMetronic.Service.Implement
 {
@@ -48,9 +49,7 @@ namespace BaseMetronic.Service.Implement
                         CreatedTime = DateTime.Now,
                         Name = Path.GetFileName(folderFullName),
                         ParentId = model.ParentId,
-                        Path = folderFullName.Replace(rootFolderPath, "").GetWebFormatPath(),
-                        TreeIds = parent != null ? $"{parent.TreeIds}_{parent.Id}" : string.Empty,
-                        AuthorId = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated ? _httpContextAccessor.HttpContext.GetLoggedInUserId() : null,
+                        Path = folderFullName.Replace(rootFolderPath, "").GetWebFormatPath(),AuthorId = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated ? _httpContextAccessor.HttpContext.GetLoggedInUserId() : null,
                         IsDirectory = true
                     };
                     if (!Directory.Exists(folderFullName))
@@ -114,6 +113,11 @@ namespace BaseMetronic.Service.Implement
             string rootPath = _webHostEnvironment.WebRootPath;
             rootPath = Path.Combine(rootPath, SystemConstant.FileStorage.ROOT_WEB_NAME);
             return rootPath;
+        }
+        public async Task<DionResponse> List(bool isOnlyFolder = false)
+        {
+            var data = await _directoryItemRepository.List(isOnlyFolder);
+            return DionResponse.Success(data);
         }
     }
 }

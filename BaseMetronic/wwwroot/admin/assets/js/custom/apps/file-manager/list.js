@@ -8,12 +8,14 @@ var KTFileManagerList = function () {
     var currentFolderId = null;
     var currentTargetId = null;
     const uploadURL = "/upload";
+    const emptyTemplate = "<div class='d-flex flex-column flex-center'><img src='/admin/assets/media/illustrations/sketchy-1/5.png' class='mw-400px'/><div class='fs-1 fw-bolder text-dark'>Không có dữ liệu.</div><div class='fs-6'>Bắt đầu tạo dữ liệu mới!</div></div>";
 
     // Define template element variables
     var uploadTemplate;
     var renameTemplate;
     var actionTemplate;
     var checkboxTemplate;
+    var folderData = [];
 
     toastr.options = {
         "closeButton": true,
@@ -31,6 +33,49 @@ var KTFileManagerList = function () {
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
+    const getListFolder = async function () {
+        try {
+            var res = await httpService.getAsync("file-manager/api/list-folder");
+            if (res.isSucceeded) {
+                folderData = res.resources;
+            }
+            else {
+                folderData = [];
+            }
+        } catch (e) {
+            console.warn(e);
+            folderData = [];
+        }
+    }
+    // Hàm để lấy tất cả các parent
+    function getParents(itemId, allItems) {
+        const parents = [];
+        const item = allItems.find(i => i.id === itemId);
+
+        // Nếu tìm thấy item
+        if (item && item.parentId !== null) {
+            const parentItem = allItems.find(i => i.id === item.parentId);
+            if (parentItem) {
+                parents.push(parentItem); // Thêm item cha vào danh sách
+                // Đệ quy để tìm các cha của item cha
+                parents.push(...getParents(parentItem.id, allItems));
+            }
+        }
+
+        return parents;
+    }
+    function removeItemAndChildren(id, allItems) {
+        // Tìm tất cả các mục con
+        const children = allItems.filter(item => item.parentId === id);
+
+        // Loại bỏ các mục con đệ quy
+        children.forEach(child => {
+            removeItemAndChildren(child.id, allItems);
+        });
+
+        // Loại bỏ mục chính
+        return allItems.filter(item => item.id !== id);
+    }
 
     const handleAction = function () {
         $(document).on("click", "[data-action=view]", function (e) {
@@ -38,6 +83,48 @@ var KTFileManagerList = function () {
             let id = $(this).data("id") || null;
             currentFolderId = id;
             reload();
+        })
+        $(document).on("click", "[data-kt-filemanager-table-filter=move_row]",async function (e) {
+            e.preventDefault();
+            let id = $(this).data("id");
+            if (!id) {
+                return;
+            }
+            await getListFolder();
+            var treefolderData = removeItemAndChildren(id, folderData);
+            $("#kt_modal_move_to_folder_form_body :not(.fv-plugins-message-container)").remove();
+            treefolderData.forEach((item, index) => {
+                var parents = getParents(item.id, treefolderData);
+                var subName = parents.map(c=>c.name).join("/");
+                $("#kt_modal_move_to_folder_form_body").append(`<!--begin::Item-->
+                                <div class="d-flex">
+                                    <!--begin::Checkbox-->
+                                    <div class="form-check form-check-custom form-check-solid">
+                                        <!--begin::Input-->
+                                        <input class="form-check-input me-3" name="move_to_folder" type="radio" value="${item.id}" id="kt_modal_move_to_folder_${item.id}" />
+                                        <!--end::Input-->
+                                        <!--begin::Label-->
+                                        <label class="form-check-label" for="kt_modal_move_to_folder_${item.id}">
+                                            <div class="fw-bold d-flex align-items-end"><i class="ki-duotone ki-folder fs-2 text-primary me-2"><span class="path1"></span><span class="path2"></span></i>${subName.length > 0 ? subName+"/":" "}${item.name}</div>
+                                        </label>
+                                        <!--end::Label-->
+                                    </div>
+                                    <!--end::Checkbox-->
+                                </div>
+                                <!--end::Item-->`);
+                if (index < treefolderData.length - 1) {
+                    $("#kt_modal_move_to_folder_form_body").append(`<div class='separator separator-dashed my-5'></div>`);
+                }
+            })
+            if (!treefolderData || treefolderData.length == 0) {
+                $("#kt_modal_move_to_folder_form_body").append(emptyTemplate);
+                $("#kt_modal_move_to_folder_submit").attr("disabled", true);
+            }
+            else {
+                $("#kt_modal_move_to_folder_submit").attr("disabled", false);
+            }
+            handleMoveToFolder();
+            $("#kt_modal_move_to_folder").modal("toggle");
         })
     }
 
@@ -213,8 +300,8 @@ var KTFileManagerList = function () {
                                             <!--end::Menu item-->
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3" data-kt-filemanager-table-filter="move_row" data-bs-toggle="modal" data-bs-target="#kt_modal_move_to_folder">
-                                                    Move to folder
+                                                <a href="#" class="menu-link px-3" data-id="${row.id}" data-kt-filemanager-table-filter="move_row">
+                                                    Chuyển đến thư mục
                                                 </a>
                                             </div>
                                             <!--end::Menu item-->
