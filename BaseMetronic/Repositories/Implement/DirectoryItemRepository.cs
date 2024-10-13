@@ -1,9 +1,9 @@
 ﻿using BaseMetronic.Models.Entities;
 using BaseMetronic.Repositories.Common;
 using BaseMetronic.Repositories.Interface;
+using BaseMetronic.Utilities.Datatables;
 using BaseMetronic.ViewModels.FileManagers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace BaseMetronic.Repositories.Implement
 {
@@ -141,6 +141,32 @@ namespace BaseMetronic.Repositories.Implement
             AddItemsToHierarchy(sortedItems, null);
 
             return sortedByHierarchy;
+        }
+
+        public async Task<DTResult<DirectoryItemDetail>> List(DTFileManagerParameters parameters)
+        {
+            var query = from i in _context.DirectoryItems
+                        where i.Active
+                        select i;
+            query = query.Where(c => c.ParentId == parameters.ParentId);
+            int recordsTotal = await query.CountAsync();
+            int recordsFiltered = await query.CountAsync();
+             query = query.Skip(parameters.Start).Take(parameters.Length);
+            var data = await query.Select(c => new DirectoryItemDetail()
+            {
+                Id = c.Id,
+                IsDirectory = c.IsDirectory,
+                Name = c.Name,
+                ParentId = c.ParentId,
+                Path = c.Path
+            }).ToListAsync();
+            return new DTResult<DirectoryItemDetail>()
+            {
+                data = data,
+                draw = parameters.Draw,
+                recordsFiltered = recordsFiltered,
+                recordsTotal = recordsTotal
+            };
         }
     }
 }

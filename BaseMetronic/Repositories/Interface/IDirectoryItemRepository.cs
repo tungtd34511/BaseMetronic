@@ -1,5 +1,6 @@
 ﻿using BaseMetronic.Models.Entities;
 using BaseMetronic.Repositories.Common;
+using BaseMetronic.Utilities.Datatables;
 using BaseMetronic.ViewModels.FileManagers;
 
 namespace BaseMetronic.Repositories.Interface
@@ -9,5 +10,6 @@ namespace BaseMetronic.Repositories.Interface
         Task<FileManagerInfoVM> GetInfo();
         Task<DirectoryItemResponse> List(DirectoryItemRequest request);
         Task<List<DirectoryItemDetail>> List(bool isOnlyFolder = false);
+        Task<DTResult<DirectoryItemDetail>> List(DTFileManagerParameters parameters);
     }
 }

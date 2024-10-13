@@ -1,0 +1,157 @@
+﻿@charset "UTF-8";
+.file-manager-placeholder {
+    background-image: url('/admin/assets/media/svg/avatars/blank.svg');
+}
+
+[data-bs-theme="dark"] .file-manager-placeholder {
+    background-image: url('/admin/assets/media/svg/avatars/blank-dark.svg');
+}
+.file-manager {
+    position: relative;
+    display: inline-block;
+    border-radius: .475rem;
+    background-repeat: no-repeat;
+    background-size: cover
+}
+
+    .file-manager:not(.file-manager-empty) {
+        background-image: none !important
+    }
+
+    .file-manager .file-manager-wrapper {
+        width: 120px;
+        height: 120px;
+        border-radius: .475rem;
+        background-repeat: no-repeat;
+        background-size: cover
+    }
+
+    .file-manager [data-file-manager-action] {
+        cursor: pointer;
+        position: absolute;
+        transform: translate(-50%,-50%)
+    }
+
+    .file-manager [data-file-manager-action=change] {
+        left: 100%;
+        top: 0
+    }
+
+        .file-manager [data-file-manager-action=change] input {
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden;
+            opacity: 0
+        }
+
+    .file-manager [data-file-manager-action=cancel], .file-manager [data-file-manager-action=remove] {
+        position: absolute;
+        left: 100%;
+        top: 100%
+    }
+
+    .file-manager [data-file-manager-action=cancel] {
+        display: none
+    }
+
+    .file-manager.file-manager-changed [data-file-manager-action=cancel] {
+        display: flex
+    }
+
+    .file-manager.file-manager-changed [data-file-manager-action=remove] {
+        display: none
+    }
+
+    .file-manager.file-manager-empty [data-file-manager-action=cancel], .file-manager.file-manager-empty [data-file-manager-action=remove] {
+        display: none
+    }
+
+    .file-manager.file-manager-circle {
+        border-radius: 50%
+    }
+
+        .file-manager.file-manager-circle .file-manager-wrapper {
+            border-radius: 50%
+        }
+
+        .file-manager.file-manager-circle [data-file-manager-action=change] {
+            left: 100%;
+            top: 0;
+            transform: translate(-100%,0)
+        }
+
+        .file-manager.file-manager-circle [data-file-manager-action=cancel], .file-manager.file-manager-circle [data-file-manager-action=remove] {
+            left: 100%;
+            top: 100%;
+            transform: translate(-100%,-100%)
+        }
+
+    .file-manager.file-manager-outline .file-manager-wrapper {
+        border: 3px solid var(--bs-body-bg);
+        box-shadow: var(--bs-box-shadow)
+    }
+@media (min-width: 1400px) {
+    .file-manager-dialog {
+        --bs-modal-width: 1320px
+    }
+}
+.file-manager-wrapper{
+    max-height: 100vh;
+}
+.file-manager-wrapper .menu {
+    padding-left: 2px;
+}
+    .file-manager-wrapper .menu-item {
+        border-radius: unset;
+        padding: 0;
+    }
+
+.file-manager-wrapper .menu-item.active > a {
+    transition: all .2s ease;
+    background-color: #1b84ff !important;
+}
+        .file-manager-wrapper .menu-item.active > a .menu-title{
+            color: white !important;
+        }
+        .file-manager-wrapper .menu-item.active > a .menu-arrow:after {
+            background-color: white !important;
+        }
+    .file-manager-wrapper .menu-sub-indention.showing {
+        box-shadow:  -2px 0 0 0 #1b84ff;
+    }
+    .file-manager-wrapper .menu-sub-indention.hover.show {
+        box-shadow:  -2px 0 0 0 #1b84ff;
+    }
+    .file-manager-wrapper .menu>.menu-item.active > a {
+        box-shadow: -2px 0 0 0 #1b84ff;
+    }
+    .file-manager-wrapper .input-group .input-group-text:not(:nth-child(2)) {
+        border-right: 1px solid hsl(214 100% 60% / 75%) !important;
+        margin-right: 1px;
+    }
+
+
+     .file-manager-body {
+        margin-bottom: 50px;
+    }
+.modal-fullscreen .file-manager-gallery {
+    min-height: calc(100vh - 121px - 50px)!important;
+}
+.file-manager-gallery .file-manager-grid {
+    display: grid;
+    grid-gap: 13.6px;
+    grid-template-columns: repeat(auto-fill, minmax(var(--file-gallery-size), 1fr));
+    -webkit-user-select: none;
+    user-select: none;
+    outline: none;
+}
+.file-manager-gallery .gallery-item {
+    min-width: var(--file-gallery-size);
+}
+.file-manager-gallery .gallery-item-figure {
+    height: var(--file-gallery-size);
+    cursor: pointer;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+}

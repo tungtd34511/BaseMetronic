@@ -1,0 +1,1003 @@
+﻿@{
+    Layout = "_Admin_Layout";
+}
+@section Headers {
+    <link href="~/admin/assets/plugins/custom/prismjs/prismjs.bundle.css" rel="stylesheet" />
+    <link href="~/admin/assets/plugins/custom/filemanager/filemanager.css" rel="stylesheet" />
+}
+@section Vendors {
+    <script src="~/admin/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
+    <script src="~/admin/assets/js/custom/documentation/documentation.js" asp-append-version="true"></script>
+    <script src="~/admin/assets/plugins/custom/filemanager/filemanager.js" asp-append-version="true"></script>
+}
+<!--begin::Content-->
+<div class="docs-content d-flex flex-column flex-column-fluid" id="kt_docs_content">
+    <!--begin::Container-->
+    <div class="app-container container-fluid d-flex flex-column flex-lg-row" id="kt_docs_content_container">
+        <!--begin::Card-->
+        <div class="card card-docs flex-row-fluid mb-2" id="kt_docs_content_card">
+            <!--begin::Card Body-->
+            <div class="card-body fs-6 py-15 px-10 py-lg-15 px-lg-15 text-gray-700">
+                <!--begin::Section-->
+                <div class="pb-10">
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="overview" data-kt-scroll-offset="50">
+                        <a href="#overview"></a>
+                        Overview
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <b>File manager</b> is an exclusive plugin that enables a simple, user-friendly and lightweight image input field.
+                    </div>
+                    <!--end::Block-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="usage" data-kt-scroll-offset="50">
+                        <a href="#usage"></a>
+                        Usage
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <b>File manager</b>'s CSS and Javascript files are bundled in the custom style and custom scripts:
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Code-->
+                    <div class="py-5">
+                        <!--begin::Highlight--><div class="highlight">
+                            <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                <pre class="language-html">
+                                    <code class="language-html">
+                                        &lt;link href=&quot;/admin/assets/plugins/custom/filemanager/filemanager.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;/&gt;
+                                        &lt;script src=&quot;/admin/assets/plugins/custom/filemanager/filemanager.js&quot;&gt;&lt;/script&gt;
+                                    </code>
+                                </pre>
+                            </div>
+                        </div><!--end::Highlight-->
+                    </div>
+                    <!--end::Code-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="initialization" data-kt-scroll-offset="50">
+                        <a href="#initialization"></a>
+                        Initialization
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <ul class="py-0">
+                            <li class="py-2">
+                                Image input does not come with its own custom CSS and it uses global input controls and related elements.
+                            </li>
+                            <li class="py-2">
+                                Image input instances are automatically initialized through <code>data-file-manager="true"</code> HTML attribute on document ready event. However,
+                                some HTML markup is required to build the content and controls required. To initialize Image Input instance in Javascript remove <code>data-file-manager="true"</code>
+                                attribute
+                            </li>
+                            <li class="py-2">
+                                The HTML markup comes in a few sections:
+                                <ul class="pt-3">
+                                    <li class="py-2">Main wrapper</li>
+                                    <li class="py-2">Image preview wrapper</li>
+                                    <li class="py-2">Edit button</li>
+                                    <li class="py-2">Cancel button</li>
+                                    <li class="py-2">Remove button</li>
+                                </ul>
+                            </li>
+                            <li class="py-2">
+                                The image preview wrapper element is identified by the <code>.file-manager-wrapper</code> css class.
+                            </li>
+                            <li class="py-2">
+                                The edit button is identified by the <code>data-file-manager-action="change"</code> attribute.
+                            </li>
+                            <li class="py-2">
+                                The cancel button is identified by the <code>data-file-manager-action="cancel"</code> attribute.
+                            </li>
+                            <li class="py-2">
+                                The remove button is identified by the <code>data-file-manager-action="remove"</code> attribute.
+                            </li>
+                            <li class="py-2">
+                                Please refer to our basic example below for a sample HTML markup.
+                            </li>
+                            <li class="py-2">
+                                Image input instances can also be controlled programmatically with Javascript. <a href="#methods" data-kt-scroll-toggle>See below for more info</a>.
+                            </li>
+                        </ul>
+                    </div>
+                    <!--end::Block-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="basic-example" data-kt-scroll-offset="50">
+                        <a href="#basic-example"></a>
+                        Basic Example
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        Basic example of an empty image input:
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <div class="rounded border p-10">
+                            <!--begin::Image input-->
+                            <div class="file-manager file-manager-empty file-manager-placeholder" data-file-manager="true">
+                                <!--begin::Preview existing avatar-->
+                                <div class="file-manager-wrapper w-125px h-125px"></div>
+                                <!--end::Preview existing avatar-->
+                                <!--begin::Edit-->
+                                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="change" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Change avatar">
+                                    <i class="ki-duotone ki-pencil fs-6"><span class="path1"></span><span class="path2"></span></i>
+                                    <!--begin::Inputs-->
+                                    <input type="file" name="avatar" accept=".png, .jpg, .jpeg" />
+                                    <input type="hidden" name="avatar_remove" />
+                                    <!--end::Inputs-->
+                                </label>
+                                <!--end::Edit-->
+                                <!--begin::Cancel-->
+                                <span class="btn btn-icon btn-color-muted btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="cancel" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Cancel avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Cancel-->
+                                <!--begin::Remove-->
+                                <span class="btn btn-icon btn-color-muted btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="remove" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Remove avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Remove-->
+                            </div>
+                            <!--end::Image input-->
+                        </div>
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Code-->
+                    <div class="py-5">
+                        <!--begin::Highlight--><div class="highlight">
+                            <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                <pre class="language-html" style="height:400px"><code class="language-html">&lt;!--begin::Image input placeholder--&gt;
+&lt;style&gt;
+    .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank.svg&#039;);
+    }
+
+    [data-bs-theme=&quot;dark&quot;] .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank-dark.svg&#039;);
+    }                
+&lt;/style&gt;
+&lt;!--end::Image input placeholder--&gt;
+
+&lt;!--begin::Image input--&gt;
+&lt;div class=&quot;file-manager file-manager-empty&quot; data-file-manager=&quot;true&quot;&gt;
+    &lt;!--begin::Image preview wrapper--&gt;
+    &lt;div class=&quot;file-manager-wrapper w-125px h-125px&quot;&gt;&lt;/div&gt;
+    &lt;!--end::Image preview wrapper--&gt;
+
+    &lt;!--begin::Edit button--&gt;
+    &lt;label class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;change&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Change avatar&quot;&gt;
+        &lt;i class=&quot;ki-duotone ki-pencil fs-6&quot;&gt;&lt;span class=&quot;path1&quot;&gt;&lt;/span&gt;&lt;span class=&quot;path2&quot;&gt;&lt;/span&gt;&lt;/i&gt;
+
+        &lt;!--begin::Inputs--&gt;
+        &lt;input type=&quot;file&quot; name=&quot;avatar&quot; accept=&quot;.png, .jpg, .jpeg&quot; /&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;avatar_remove&quot; /&gt;
+        &lt;!--end::Inputs--&gt;
+    &lt;/label&gt;
+    &lt;!--end::Edit button--&gt;
+
+    &lt;!--begin::Cancel button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;cancel&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Cancel avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Cancel button--&gt;
+
+    &lt;!--begin::Remove button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;remove&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Remove avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Remove button--&gt;
+&lt;/div&gt;
+&lt;!--end::Image input--&gt;</code></pre>
+                            </div>
+                        </div><!--end::Highlight-->
+                    </div>
+                    <!--end::Code-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="outline-style" data-kt-scroll-offset="50">
+                        <a href="#outline-style"></a>
+
+                        Outline Style
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        Sets the image preview wrapper with a bordered edge:
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <div class="rounded border p-10">
+                            <!--begin::Background image-->
+                            <style>
+                                .file-manager-placeholder3 {
+                                    background-image: url('/admin/assets/media/svg/avatars/blank.svg');
+                                }
+
+                                [data-bs-theme="dark"] .file-manager-placeholder3 {
+                                    background-image: url('/admin/assets/media/svg/avatars/blank-dark.svg');
+                                }
+                            </style>
+                            <!--end::Background image-->
+                            <!--begin::Image input-->
+                            <div class="file-manager file-manager-outline file-manager-placeholder3" data-file-manager="true">
+                                <!--begin::Preview existing avatar-->
+                                <div class="file-manager-wrapper w-125px h-125px" style="background-image: url(/admin/assets/media/avatars/300-1.jpg)"></div>
+                                <!--end::Preview existing avatar-->
+                                <!--begin::Edit-->
+                                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="change" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Change avatar">
+                                    <i class="ki-duotone ki-pencil fs-6"><span class="path1"></span><span class="path2"></span></i>
+                                    <!--begin::Inputs-->
+                                    <input type="file" name="avatar" accept=".png, .jpg, .jpeg" />
+                                    <input type="hidden" name="avatar_remove" />
+                                    <!--end::Inputs-->
+                                </label>
+                                <!--end::Edit-->
+                                <!--begin::Cancel-->
+                                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="cancel" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Cancel avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Cancel-->
+                                <!--begin::Remove-->
+                                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="remove" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Remove avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Remove-->
+                            </div>
+                            <!--end::Image input-->
+                        </div>
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Code-->
+                    <div class="py-5">
+                        <!--begin::Highlight--><div class="highlight">
+                            <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                <pre class="language-html" style="height:400px"><code class="language-html">&lt;!--begin::Image input placeholder--&gt;
+&lt;style&gt;
+    .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank.svg&#039;);
+    }
+
+    [data-bs-theme=&quot;dark&quot;] .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank-dark.svg&#039;);
+    }                
+&lt;/style&gt;
+&lt;!--end::Image input placeholder--&gt;
+
+&lt;!--begin::Image input--&gt;
+&lt;div class=&quot;file-manager file-manager-outline&quot; data-file-manager=&quot;true&quot; style=&quot;background-image: url(/assets/media/svg/avatars/blank.svg)&quot;&gt;
+    &lt;!--begin::Image preview wrapper--&gt;
+    &lt;div class=&quot;file-manager-wrapper w-125px h-125px&quot; style=&quot;background-image: url(/assets/media/avatars/300-1.jpg)&quot;&gt;&lt;/div&gt;
+    &lt;!--end::Image preview wrapper--&gt;
+
+    &lt;!--begin::Edit button--&gt;
+    &lt;label class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;change&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Change avatar&quot;&gt;
+        &lt;i class=&quot;ki-duotone ki-pencil fs-6&quot;&gt;&lt;span class=&quot;path1&quot;&gt;&lt;/span&gt;&lt;span class=&quot;path2&quot;&gt;&lt;/span&gt;&lt;/i&gt;
+
+        &lt;!--begin::Inputs--&gt;
+        &lt;input type=&quot;file&quot; name=&quot;avatar&quot; accept=&quot;.png, .jpg, .jpeg&quot; /&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;avatar_remove&quot; /&gt;
+        &lt;!--end::Inputs--&gt;
+    &lt;/label&gt;
+    &lt;!--end::Edit button--&gt;
+
+    &lt;!--begin::Cancel button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;cancel&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Cancel avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Cancel button--&gt;
+
+    &lt;!--begin::Remove button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;remove&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Remove avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Remove button--&gt;
+&lt;/div&gt;
+&lt;!--end::Image input--&gt;</code></pre>
+                            </div>
+                        </div><!--end::Highlight-->
+                    </div>
+                    <!--end::Code-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="circle-style" data-kt-scroll-offset="50">
+                        <a href="#circle-style"></a>
+
+                        Circle Style
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        Circle edge example of an image input:
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <div class="rounded border p-10">
+                            <!--begin::Background image-->
+                            <style>
+                                .file-manager-placeholder2 {
+                                    background-image: url('/admin/assets/media/svg/avatars/blank.svg');
+                                }
+
+                                [data-bs-theme="dark"] .file-manager-placeholder2 {
+                                    background-image: url('/admin/assets/media/svg/avatars/blank-dark.svg');
+                                }
+                            </style>
+                            <!--end::Background image-->
+                            <!--begin::Image input-->
+                            <div class="file-manager file-manager-circle file-manager-placeholder2" data-file-manager="true">
+                                <!--begin::Preview existing avatar-->
+                                <div class="file-manager-wrapper w-125px h-125px" style="background-image: url('/admin/assets/media/avatars/300-20.jpg')"></div>
+                                <!--end::Preview existing avatar-->
+                                <!--begin::Edit-->
+                                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="change" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Change avatar">
+                                    <i class="ki-duotone ki-pencil fs-6"><span class="path1"></span><span class="path2"></span></i>
+                                    <!--begin::Inputs-->
+                                    <input type="file" name="avatar" accept=".png, .jpg, .jpeg" />
+                                    <input type="hidden" name="avatar_remove" />
+                                    <!--end::Inputs-->
+                                </label>
+                                <!--end::Edit-->
+                                <!--begin::Cancel-->
+                                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="cancel" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Cancel avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Cancel-->
+                                <!--begin::Remove-->
+                                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="remove" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Remove avatar">
+                                    <i class="ki-outline ki-cross fs-3"></i>
+                                </span>
+                                <!--end::Remove-->
+                            </div>
+                            <!--end::Image input-->
+                        </div>
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Code-->
+                    <div class="py-5">
+                        <!--begin::Highlight--><div class="highlight">
+                            <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                <pre class="language-html" style="height:400px"><code class="language-html">&lt;!--begin::Image input placeholder--&gt;
+&lt;style&gt;
+    .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank.svg&#039;);
+    }
+
+    [data-bs-theme=&quot;dark&quot;] .file-manager-placeholder {
+        background-image: url(&#039;svg/avatars/blank-dark.svg&#039;);
+    }                
+&lt;/style&gt;
+&lt;!--end::Image input placeholder--&gt;
+
+&lt;!--begin::Image input--&gt;
+&lt;div class=&quot;file-manager file-manager-circle&quot; data-file-manager=&quot;true&quot; style=&quot;background-image: url(/assets/media/svg/avatars/blank.svg)&quot;&gt;
+    &lt;!--begin::Image preview wrapper--&gt;
+    &lt;div class=&quot;file-manager-wrapper w-125px h-125px&quot; style=&quot;background-image: url(/assets/media/avatars/300-20.jpg)&quot;&gt;&lt;/div&gt;
+    &lt;!--end::Image preview wrapper--&gt;
+
+    &lt;!--begin::Edit button--&gt;
+    &lt;label class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;change&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Change avatar&quot;&gt;
+        &lt;i class=&quot;ki-duotone ki-pencil fs-6&quot;&gt;&lt;span class=&quot;path1&quot;&gt;&lt;/span&gt;&lt;span class=&quot;path2&quot;&gt;&lt;/span&gt;&lt;/i&gt;
+
+        &lt;!--begin::Inputs--&gt;
+        &lt;input type=&quot;file&quot; name=&quot;avatar&quot; accept=&quot;.png, .jpg, .jpeg&quot; /&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;avatar_remove&quot; /&gt;
+        &lt;!--end::Inputs--&gt;
+    &lt;/label&gt;
+    &lt;!--end::Edit button--&gt;
+
+    &lt;!--begin::Cancel button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;cancel&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Cancel avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Cancel button--&gt;
+
+    &lt;!--begin::Remove button--&gt;
+    &lt;span class=&quot;btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow&quot;
+    data-file-manager-action=&quot;remove&quot;
+    data-bs-toggle=&quot;tooltip&quot;
+    data-bs-dismiss=&quot;click&quot;
+    title=&quot;Remove avatar&quot;&gt;
+        &lt;i class=&quot;ki-outline ki-cross fs-3&quot;&gt;&lt;/i&gt;
+    &lt;/span&gt;
+    &lt;!--end::Remove button--&gt;
+&lt;/div&gt;
+&lt;!--end::Image input--&gt;</code></pre>
+                            </div>
+                        </div><!--end::Highlight-->
+                    </div>
+                    <!--end::Code-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="markup-reference" data-kt-scroll-offset="50">
+                        <a href="#markup-reference"></a>
+
+                        Markup Reference
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        Image input uses both CSS and HTML attributes to define the input configuration. The CSS classes below must be placed next to the main <code>file-manager</code> css class within the main wrapper. Here are the references for each below
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <div class="fw-bold fs-2">CSS classes references</div>
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Table-->
+                    <div class="py-5">
+                        <div class="table-responsive border rounded">
+                            <table class="table table-striped align-top mb-0 g-5">
+                                <thead>
+                                    <tr class="fs-4 fw-bold text-gray-900 p-6">
+                                        <th class="min-w-300px">Name</th>
+                                        <th class="min-w-500px">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <code>file-manager</code>
+                                        </td>
+                                        <td>
+                                            Enables the image input component.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>file-manager-circle</code>
+                                        </td>
+                                        <td>
+                                            Sets the image preview wrapper with a circle edge.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>file-manager-outline</code>
+                                        </td>
+                                        <td>
+                                            Sets the image preview wrapper with a bordered edge.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Table-->
+                    <!--begin::Notice-->
+                    <div class="py-5">
+                        <!--begin::Information--><div class="d-flex align-items-center rounded py-5 px-5 bg-light-primary ">
+                            <i class="ki-duotone ki-information-5 fs-3x text-primary me-5"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>    <!--begin::Description-->    <div class="text-gray-700 fw-bold fs-6">
+                                Tip: The <code>file-manager-circle</code> and <code>file-manager-outline</code> classes can be used simultaneously.
+                            </div>    <!--end::Description-->
+                        </div><!--end::Information-->
+                    </div>
+                    <!--end::Notice-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        <div class="fw-bold fs-2">HTML attribute references</div>
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Table-->
+                    <div class="py-5">
+                        <div class="table-responsive border rounded">
+                            <table class="table table-striped align-top mb-0 g-5">
+                                <thead>
+                                    <tr class="fs-4 fw-bold text-gray-900 p-6">
+                                        <th class="min-w-300px">Name</th>
+                                        <th class="min-w-100px">Type</th>
+                                        <th class="min-w-500px">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <code>data-file-manager</code>
+                                        </td>
+                                        <td>
+                                            <code class="ms-0">mandatory</code>
+                                        </td>
+                                        <td>
+                                            Accepts <code>true</code> and <code>false</code> values, when <code>true</code> is set <code>KTImageInput</code>
+                                            Javascript class automatically initializes the image input instance to apply the edit & remove logic.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>data-file-manager-action</code>
+                                        </td>
+                                        <td>
+                                            <code class="ms-0">mandatory</code>
+                                        </td>
+                                        <td>
+                                            <div class="mb-3">
+                                                To be applied to each button type. Accepts either <code>change</code>, <code>cancel</code> or <code>remove</code> values. This specifies the type of button it's assigned to.
+                                            </div>
+
+                                            Each button must be defined within the main wrapper of the image input.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Table-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="py-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="methods" data-kt-scroll-offset="50">
+                        <a href="#methods"></a>
+
+                        Methods
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        All Image Input components are initialized automatically, however the following are the Image input's
+                        functionality methods for more control.
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Table-->
+                    <div class="py-2">
+                        <!--begin::Table wrapper-->
+                        <div class="table-responsive border rounded">
+                            <!--begin::Table-->
+                            <table class="table table-striped mb-0 g-6">
+                                <!--begin::Head-->
+                                <thead>
+                                    <tr class="fs-4 fw-bold p-6">
+                                        <th class="min-w-250px">Name</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <!--end::Head-->
+                                <!--begin::Head-->
+                                <thead>
+                                    <tr class="fs-4 fw-bold p-6">
+                                        <th colspan="2">Static Methods</th>
+                                    </tr>
+                                </thead>
+                                <!--end::Head-->
+                                <!--begin::Body-->
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <code>createInstances(DOMString selector)</code>
+                                        </td>
+                                        <td>
+                                            Initializes Image Input instances by selector. Default value of <code>selector</code> is <code>[data-file-manager]</code>.
+                                            This method can be used to initialize dynamicly populated Image Input instances(e.g: after Ajax request).
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">  <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code"><pre class="language-javascript"><code class="language-javascript">KTImageInput.createInstances();</code></pre>    </div></div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>getInstance(DOMElement element)</code>
+                                        </td>
+                                        <td>
+                                            Get the Image input instance created
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_control&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <!--end::Body-->
+                                <!--begin::Head-->
+                                <thead>
+                                    <tr class="fs-4 fw-bold p-6">
+                                        <th colspan="2">Public Methods</th>
+                                    </tr>
+                                </thead>
+                                <!--end::Head-->
+                                <!--begin::Body-->
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <code>Constructor</code>
+                                        </td>
+                                        <td>
+                                            Constructs a new instance of <code>KTImageInput</code> class and initializes an Image Input control:
+                                            <div class="pt-3 mb-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_control&quot;);
+var imageInput = new KTImageInput(imageInputElement);</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+
+                                            <!--begin::Information--><div class="d-flex align-items-center rounded py-5 px-5 bg-light-info ">
+                                                <i class="ki-duotone ki-information-5 fs-3x text-info me-5"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>    <!--begin::Description-->    <div class="text-gray-700 fw-bold fs-6">
+                                                    Remove <code>data-file-manager="true"</code> attribute to avoid lazy initializes.
+                                                </div>    <!--end::Description-->
+                                            </div><!--end::Information-->
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>getInputElement</code>
+                                        </td>
+                                        <td>
+                                            Returns the selected image input instance input field.
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">  <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code"><pre class="language-javascript"><code class="language-javascript">imageInput.getInputElement();</code></pre>    </div></div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>goElement</code>
+                                        </td>
+                                        <td>
+                                            Returns the selected image input instance.
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">  <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code"><pre class="language-javascript"><code class="language-javascript">imageInput.goElement();</code></pre>    </div></div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <!--end::Body-->
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Table-->
+                </div>
+                <!--end::Section-->
+                <!--begin::Section-->
+                <div class="pt-10">
+
+                    <!--begin::Heading-->
+                    <h1 class="anchor fw-bold mb-5" id="events" data-kt-scroll-offset="50">
+                        <a href="#events"></a>
+
+                        Events
+                    </h1>
+                    <!--end::Heading-->
+                    <!--begin::Block-->
+                    <div class="py-5">
+                        Below are few events for hooking into the Image input functionality.
+                    </div>
+                    <!--end::Block-->
+                    <!--begin::Table-->
+                    <div class="pt-2">
+                        <!--begin::Table wrapper-->
+                        <div class="table-responsive border rounded">
+                            <!--begin::Table-->
+                            <table class="table table-striped mb-0 g-6">
+                                <!--begin::Head-->
+                                <thead>
+                                    <tr class="fs-4 fw-bold p-6">
+                                        <th class="min-w-200px">Event Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <!--end::Head-->
+                                <!--begin::Body-->
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.change</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input is about to change.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.change&quot;, function() {
+    // console.log(&quot;kt.imageinput.change event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.changed</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input has been changed.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.changed&quot;, function() {
+    // console.log(&quot;kt.imageinput.changed event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.cancel</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input is about to get cancelled.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.cancel&quot;, function() {
+    // console.log(&quot;kt.imageinput.cancel event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.canceled</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input has been cancelled.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.canceled&quot;, function() {
+    // console.log(&quot;kt.imageinput.canceled event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.remove</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input is about to get removed.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.remove&quot;, function() {
+    // console.log(&quot;kt.imageinput.remove event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <code>kt.imageinput.removed</code>
+                                        </td>
+                                        <td>
+                                            This event fires on when the image input has been removed.
+
+                                            <div class="pt-3">
+                                                <!--begin::Highlight--><div class="highlight">
+                                                    <button class="highlight-copy btn" data-bs-toggle="tooltip" title="Copy code">copy</button>    <div class="highlight-code">
+                                                        <pre class="language-javascript"><code class="language-javascript">var imageInputElement = document.querySelector(&quot;#kt_image_input_example_1&quot;);
+var imageInput = KTImageInput.getInstance(imageInputElement);
+imageInput.on(&quot;kt.imageinput.removed&quot;, function() {
+    // console.log(&quot;kt.imageinput.removed event is fired&quot;);
+});</code></pre>
+                                                    </div>
+                                                </div><!--end::Highlight-->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <!--end::Body-->
+                            </table>
+                        </div>
+                    </div>
+                    <!--end::Table-->
+                </div>
+                <!--end::Section-->
+
+            </div>
+            <!--end::Card Body-->
+        </div>
+        <!--end::Card-->
+        <!--begin::Sidebar wrapper-->
+        <div class="ms-7 flex-row-auto w-lg-250px">
+            <!--begin::Sidebar nav-->
+            <div class="card card-flush d-none d-lg-flex"
+                 data-kt-sticky="true"
+                 data-kt-sticky-name="sidebar-navs"
+                 data-kt-sticky-offset="{default: false, lg: 250}"
+                 data-kt-sticky-width="250px"
+                 data-kt-sticky-animation="false"
+                 data-kt-sticky-left="auto"
+                 data-kt-sticky-top="97px"
+                 data-kt-sticky-zindex="5">
+                <!--begin::Card body-->
+                <div class="card-body px-0 px-6 py-6 min-h-300px">
+                    <!--begin::Menu-->
+                    <ul id="kt_sidebar_nav" class="nav nav-flush menu menu-column menu-title-gray-700 menu-bullet-gray-300 menu-state-primary fw-semibold fs-6 mb-8">
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#overview" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Overview</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#usage" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Usage</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#initialization" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Initialization</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#basic-example" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Basic Example</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#outline-style" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Outline Style</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#circle-style" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Circle Style</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#markup-reference" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Markup Reference</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#methods" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Methods</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                        <!--begin::Item-->
+                        <li class="menu-item py-2 px-3">
+                            <!--begin::Link-->
+                            <a href="#events" data-kt-scroll-toggle="true" class="menu-link p-0 nav-link">
+                                <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                <span class="menu-title">Events</span>
+                            </a>
+                            <!--end::Link-->
+                        </li>
+                        <!--end::Item-->
+                    </ul>
+                    <!--end::Menu-->
+                </div>
+                <!--end::Card body-->
+            </div>
+            <!--end::Sidebar nav-->
+        </div>
+        <!--end::Sidebar wrapper-->
+    </div>
+    <!--end::Container-->
+</div>
+<!--end::Content-->

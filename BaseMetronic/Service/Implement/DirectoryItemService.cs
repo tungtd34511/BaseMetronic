@@ -5,9 +5,9 @@ using BaseMetronic.Repositories.Interface;
 using BaseMetronic.Service.Common;
 using BaseMetronic.Service.Interface;
 using BaseMetronic.Utilities;
+using BaseMetronic.Utilities.Datatables;
 using BaseMetronic.Utilities.Extensions;
 using BaseMetronic.ViewModels.FileManagers;
-using Microsoft.IdentityModel.Tokens;
 
 namespace BaseMetronic.Service.Implement
 {
@@ -118,6 +118,10 @@ namespace BaseMetronic.Service.Implement
         {
             var data = await _directoryItemRepository.List(isOnlyFolder);
             return DionResponse.Success(data);
+        }
+        public async Task<DTResult<DirectoryItemDetail>> List(DTFileManagerParameters parameters)
+        {
+            return await _directoryItemRepository.List(parameters);
         }
     }
 }

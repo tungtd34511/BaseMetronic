@@ -1,6 +1,7 @@
 ﻿using BaseMetronic.Models.Entities;
 using BaseMetronic.Service.Common;
 using BaseMetronic.Utilities;
+using BaseMetronic.Utilities.Datatables;
 using BaseMetronic.ViewModels.FileManagers;
 
 namespace BaseMetronic.Service.Interface
@@ -12,5 +13,6 @@ namespace BaseMetronic.Service.Interface
         Task<DionResponse> List(DirectoryItemRequest request);
         Task<DionResponse> RenameFolder(RenameDirectoryItemDTO model);
         Task<DionResponse> List(bool isOnlyFolder = false);
+        Task<DTResult<DirectoryItemDetail>> List(DTFileManagerParameters parameters);
     }
 }

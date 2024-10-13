@@ -23,6 +23,7 @@ namespace BaseMetronic.Controllers.Admin
         }
 
         [Route("sign-in")]
+        [AllowAnonymous]
         public IActionResult SignIn(string returnUrl)
         {
             // Pass the returnUrl to the view to use it after login
@@ -59,8 +60,12 @@ namespace BaseMetronic.Controllers.Admin
         }
         #region Apps
         [Route("apps/file-manager/folders")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Folders()
+        {
+            return View();
+        }
+        [Route("apps/file-manager/demo")]
+        public IActionResult FileManagerDemo()
         {
             return View();
         }

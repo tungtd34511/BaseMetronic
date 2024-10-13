@@ -11,6 +11,7 @@ namespace BaseMetronic.Controllers.Core
 {
     [Route("file-manager")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class FileManagerController : BaseApiController<DirectoryItem>
     {
         private readonly IDirectoryItemService _directoryItemService;
@@ -21,8 +22,7 @@ namespace BaseMetronic.Controllers.Core
             _logger = loggerFactory.CreateLogger<FileManagerController>();
         }
 
-        [HttpGet("api/get-info")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]       
+        [HttpGet("api/get-info")]     
         
         public async Task<IActionResult> GetInfo()
         {
@@ -39,7 +39,6 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpPost("api/add-folder")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> AddFolder([FromBody] AddFolderDTO dto)
         {
             try
@@ -55,7 +54,6 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpGet("api/list")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> List([FromQuery] DirectoryItemRequest request)
         {
             try
@@ -71,7 +69,6 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpDelete("api/delete/{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -87,7 +84,6 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpPut("api/rename-folder")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> RenameFolder([FromBody]RenameDirectoryItemDTO model)
         {
             try
@@ -103,7 +99,6 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpGet("api/list-folder")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> ListFolder()
         {
             try
@@ -116,6 +111,20 @@ namespace BaseMetronic.Controllers.Core
                 _logger.LogError(e, "Some thing wrong when Task<IActionResult> ListFolder()");
                 return BadRequest();
             }
-        } 
+        }
+        [HttpPost("api/list-server-side")]
+        public async Task<IActionResult> ListServerSide([FromBody] DTFileManagerParameters parameters)
+        {
+            try
+            {
+                var res = await _directoryItemService.List(parameters);
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Something wrong when ListServerSide([FromBody] DTFileManagerParameters parameters)");
+                return BadRequest();
+            }
+        }
     }
 }
