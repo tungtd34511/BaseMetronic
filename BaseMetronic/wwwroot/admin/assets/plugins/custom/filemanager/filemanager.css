@@ -146,6 +146,7 @@
     outline: none;
 }
 .file-manager-gallery .gallery-item {
+    cursor: pointer;
     min-width: var(--file-gallery-size);
 }
 .file-manager-gallery .gallery-item-figure {
@@ -154,4 +155,22 @@
     margin: 0;
     overflow: hidden;
     position: relative;
+}
+.file-manager-wrapper .box-overlay {
+    position: absolute;
+    z-index: 4;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bs-overlay-bg);
+    transition: all .3s ease;
+}
+.file-manager-wrapper .box-overlay.show {
+    transition: all 0.3s ease;
+    opacity: 1 !important;
 }
