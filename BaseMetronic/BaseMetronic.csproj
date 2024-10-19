@@ -8,13 +8,9 @@
 
   <ItemGroup>
     <Compile Remove="Logs\**" />
-    <Compile Remove="wwwroot\upload\**" />
     <Content Remove="Logs\**" />
-    <Content Remove="wwwroot\upload\**" />
     <EmbeddedResource Remove="Logs\**" />
-    <EmbeddedResource Remove="wwwroot\upload\**" />
     <None Remove="Logs\**" />
-    <None Remove="wwwroot\upload\**" />
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
@@ -46,5 +42,16 @@
 	  <Folder Include="wwwroot\lib\bootstrap\dist\js\" />
 	  <Folder Include="wwwroot\lib\jquery-validation\" />
 	  <Folder Include="wwwroot\lib\jquery-validation\dist\" />
+	  <Folder Include="wwwroot\NewFolder\" />
+	  <Folder Include="wwwroot\upload\avatar %281%29\" />
+	  <Folder Include="wwwroot\upload\avatar %282%29\" />
+	  <Folder Include="wwwroot\upload\avatar\" />
+	  <Folder Include="wwwroot\upload\media %281%29\" />
+	  <Folder Include="wwwroot\upload\media %282%29\" />
+	  <Folder Include="wwwroot\upload\media\blog\tungtd\avatar\casklmcskascm\" />
+	  <Folder Include="wwwroot\upload\product\" />
+	  <Folder Include="wwwroot\upload\tungtd %281%29\" />
+	  <Folder Include="wwwroot\upload\tungtd\" />
+	  <Folder Include="wwwroot\upload\videos\" />
 	</ItemGroup>
 </Project>

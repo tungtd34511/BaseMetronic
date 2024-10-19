@@ -16,14 +16,15 @@ namespace BaseMetronic.Controllers.Core
     {
         private readonly IDirectoryItemService _directoryItemService;
         private readonly ILogger _logger;
-        public FileManagerController(IBaseService<DirectoryItem> service, IAPILogService aPILogService, ILoggerFactory loggerFactory, IDirectoryItemService directoryItemService) : base(service, aPILogService, loggerFactory)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public FileManagerController(IBaseService<DirectoryItem> service, IAPILogService aPILogService, ILoggerFactory loggerFactory, IDirectoryItemService directoryItemService, IWebHostEnvironment webHostEnvironment) : base(service, aPILogService, loggerFactory)
         {
             _directoryItemService = directoryItemService;
             _logger = loggerFactory.CreateLogger<FileManagerController>();
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet("api/get-info")]     
-        
         public async Task<IActionResult> GetInfo()
         {
             try
@@ -124,6 +125,75 @@ namespace BaseMetronic.Controllers.Core
             {
                 _logger.LogError(e, "Something wrong when ListServerSide([FromBody] DTFileManagerParameters parameters)");
                 return BadRequest();
+            }
+        }
+        [HttpGet("api/detail/{id}")]
+        public async Task<IActionResult> Detail(int id)
+        {
+            try
+            {
+                var res = await _directoryItemService.GetByIdAsync(id);
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Some thing wrong when Task<IActionResult> Detail(int id)");
+                return BadRequest();
+            }
+        }
+
+        [HttpPost("api/upload")]
+        public async Task<IActionResult> Upload([FromForm] IFormFile chunk, [FromForm] string fileName, [FromForm] int chunkIndex, [FromForm] int totalChunks)
+        {
+            try
+            {
+                var _uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "upload");
+
+                if (chunk == null || chunk.Length == 0)
+                    return BadRequest("Invalid chunk.");
+
+                var tempFilePath = Path.Combine(_uploadPath, $"{fileName}.part_{chunkIndex}");
+
+                // Save the chunk
+                using (var stream = new FileStream(tempFilePath, FileMode.Create))
+                {
+                    await chunk.CopyToAsync(stream);
+                }
+
+                // Check if all chunks are uploaded
+                if (chunkIndex + 1 == totalChunks)
+                {
+                    await CombineChunks(fileName, totalChunks);
+                }
+
+                return Ok($"Chunk {chunkIndex + 1} uploaded successfully.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Something wrong when upload chunk file");
+                return BadRequest();
+            }
+
+        }
+
+        [NonAction]
+        private async Task CombineChunks(string fileName, int totalChunks)
+        {
+            var _uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "upload");
+            var finalFilePath = Path.Combine(_uploadPath, fileName);
+
+            using (var finalStream = new FileStream(finalFilePath, FileMode.Create))
+            {
+                for (int i = 0; i < totalChunks; i++)
+                {
+                    var chunkPath = Path.Combine(_uploadPath, $"{fileName}.part_{i}");
+                    using (var chunkStream = new FileStream(chunkPath, FileMode.Open))
+                    {
+                        await chunkStream.CopyToAsync(finalStream);
+                    }
+                    // Delete chunk after combining
+                    System.IO.File.Delete(chunkPath);
+                }
             }
         }
     }

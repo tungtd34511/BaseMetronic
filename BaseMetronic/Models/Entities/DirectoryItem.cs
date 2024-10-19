@@ -9,6 +9,7 @@ namespace BaseMetronic.Models.Entities
         public DateTime? LastModified { get; set; }
         public string Path { get; set; } = string.Empty;
         public bool IsDirectory { get; set; }
+        public string? Extension { get; set; }
         public int? ParentId { get; set; }
         public int? AuthorId { get; set; }
         [JsonIgnore]

@@ -1,6 +1,24 @@
 ﻿"use trict";
 const FILE_MANAGER = function () {
-    var folderData = [];
+    var folderData = [], selectedData = [];
+    var uploadStatus = true;
+    var targetEl;
+    var imgExtensions = [
+        "jpeg", "jpg", "png", "gif",
+        "bmp", "webp", "tiff"
+    ];
+    var docExtensions = [
+        "doc", "docx", "ppt", "pptx",
+        "xls", "xlsx", "odt", "pdf", "txt"
+    ];
+
+    var allowedExtensions = [
+        "avi", "mov", "webm", "mp4", "mp3", "flac", "aac", "ogg",
+        "7z", "rar", "zip", "gz", "jpeg", "jpg", "png", "gif",
+        "bmp", "webp", "tiff", "doc", "docx", "ppt", "pptx",
+        "xls", "xlsx", "odt", "pdf", "txt"
+    ];
+
     var viewModeOptions = {
         fullscreen: "fullscreen",
         default: "default"
@@ -11,6 +29,10 @@ const FILE_MANAGER = function () {
         start: 0,
         draw: 1
     }
+    var uploadOption = {
+        accept: "",
+        maximumFileSize: 25 * 1024 * 1024,//25MB
+    }
     var iconOptions = {
         minimize: (className = "") => {
             return $(`<i class="ki-duotone ki-slider-vertical ${className}">
@@ -18,7 +40,7 @@ const FILE_MANAGER = function () {
  <span class="path2"></span>
  <span class="path3"></span>
 </i>`);
-},
+        },
         maximize: (className = "") => {
             return $(`<i class="ki-duotone ki-maximize ${className}">
  <span class="path1"></span>
@@ -38,7 +60,9 @@ const FILE_MANAGER = function () {
     var option = {
         viewMode: viewModeOptions.default,
         gallerySize: 140,//pixel
-        timeOut: 150,//miliseconds
+        timeOut: 150,//miliseconds,
+        maximumFileSize: 5 * 1024 * 1024 * 1024,
+        maximumImageResolution: 50,
     }
     toastr.options = {
         "closeButton": true,
@@ -56,17 +80,88 @@ const FILE_MANAGER = function () {
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
-    var infoSidebar = $(`<div class="card rounded-top-0 rounded-start-0  min-w-300px mw-300px">
-    <div class="card-header border-0 px-3">
-      <div class="card-title">212313</div>
-      <div class="card-toolbar flex-row-fluid justify-content-end">
-        <button class="btn btn-sm btn-icon btn-active-light-primary me-3" data-bs-trigger="hover" data-action="close" data-bs-toggle="tooltip" title="Đóng">
-                 <i class="ki-solid ki-arrow-right fs-3 text-primary"></i>
+    var uploadEl = $(`<input type="file" class="d-none" accept="" multiple/>`);
+    var infoSidebar = $(`<form class="card rounded-top-0 rounded-start-0  min-w-300px mw-300px">
+        <div class="card-header border-0 min-h-20px p-2 px-5">
+          <div class="card-title my-0"></div>
+          <div class="card-toolbar flex-row-fluid justify-content-end my-0">
+            <button class="btn btn-sm btn-icon btn-active-light-primary" data-bs-trigger="hover" data-action="close" data-bs-toggle="tooltip" title="Đóng">
+                     <i class="ki-solid ki-arrow-right fs-3 text-primary"></i>
+                </button>
+          </div>
+        </div>
+        <div class="card-body p-2 px-5 d-flex flex-column gap-5 ">
+            <div class="fv-row" id="directory-recordsTotal">
+                <label class="form-label fs-8 fw-light text-muted">Số lượng bản ghi</label>
+                <div name="recordsTotal">0</div> 
+            </div>
+             <div class="fv-row" id="directory-allowed-extensions">
+                <label class="form-label fs-8 fw-light text-muted">Extension cho phép</label>
+                <div class="d-flex flex-wrap gap-2" name="allowed-extensions">Không giới hạn</div> 
+            </div>
+             <div class="fv-row" id="directory-allowed-extensions">
+                <label class="form-label fs-8 fw-light text-muted">Giới hạn tệp tin</label>
+                <div class="d-flex flex-column gap-1 fs-7" name="allowed-extensions">
+                    <div class="d-flex justify-content-between">
+                        <span>Kích thước tệp tối đa</span>
+                        <span>${convertBytes(option.maximumFileSize)}</span>
+                    </div>
+                    <div class="separator"></div>
+                    <div class="d-flex justify-content-between">
+                        <span>Độ phân giải hình ảnh tối đa</span>
+                        <span>${option.maximumImageResolution} MP</span>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        <div class="card-footer border-0 p-2 px-5">
+            <div class="d-flex justify-content-end fade show" data-control="toolbar" >
+            <!--begin::Button-->
+            <button type="submit" class="btn btn-primary btn-sm me-5" >
+                <span class="indicator-label">
+                    Lưu
+                </span>
+                <span class="indicator-progress">
+                    Vui lòng đợi... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                </span>
             </button>
-      </div>
+            <!--end::Button-->
+             <!--begin::Button-->
+             <button type="reset" class="btn btn-light btn-sm" >
+                Hủy
+            </a>
+            <!--end::Button-->
+        </div>
+        </div>
+    </form>`).hide();
+    var overlayUpload = $(`<div class="bg-dark bg-opacity-25 box-overlay fixed fade">
+                                <div class="card control-container shadow-sm w-400px mw-400px">
+    <div class="card-header">
+        <h3 class="card-title">
+        <i class="ki-duotone ki-exit-up fs-2x me-2 text-primary">
+ <span class="path1"></span>
+ <span class="path2"></span>
+ <span class="path3"></span>
+</i>
+        Tải lên tệp tin</h3>
     </div>
-  
-        </div>`).hide();
+    <div class="card-body">
+       <div class="d-flex align-items-center flex-column" data-control="progress">
+                        <div class="d-flex justify-content-between w-100 mt-auto mb-2">
+                            <span class="fw-semibold fs-6 text-gray-500" role="title">Đang tải 5 tệp tin</span>
+                            <span class="fw-bold fs-6" role="percent">0%</span>
+                        </div>
+
+                        <div class="h-5px mx-3 w-100 bg-light mb-3">
+                            <div class="bg-success rounded h-5px" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between w-100 mt-auto">
+                            <span class="fw-semibold fs-8 text-gray-700" role="time">5 MB/6 GB (Còn khoảng 5 phút)</span>
+                        </div>
+                    </div>
+    </div>
+</div>
+                            </div>`).hide();
     var overlayAddFolder = $(`<div class="bg-dark bg-opacity-25 box-overlay fade">
                                 <div class="card control-container shadow-sm w-400px mw-400px">
     <div class="card-header">
@@ -171,7 +266,7 @@ const FILE_MANAGER = function () {
             <div class="card-title my-0"><span class="text">Digital Innovation</span></div>
         <div class="card-toolbar flex-row-fluid justify-content-end gap-1 my-0" ><div>
             <div class="input-group input-group-sm btn-active-light-primary">
-    <span class="input-group-text btn btn-primary btn-sm border-end">
+    <span class="input-group-text btn btn-primary btn-sm border-end" data-action="upload">
         <i class="ki-duotone ki-exit-up  fs-4">
  <span class="path1"></span>
  <span class="path2"></span>
@@ -186,19 +281,7 @@ const FILE_MANAGER = function () {
 <div class="menu menu-sub rounded menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-175px py-4" data-kt-menu="true">
     <!--begin::Menu item-->
     <div class="menu-item px-3">
-                <a href="#!" class="menu-link px-3">
-                <i class="ki-duotone ki-file-up fs-3 me-2 text-primary">
- <span class="path1"></span>
- <span class="path2"></span>
-</i>
-            Tải lên tệp tin
-        </a>
-    </div>
-    <!--end::Menu item-->
-    
-    <!--begin::Menu item-->
-    <div class="menu-item px-3">
-                <a href="#!" class="menu-link px-3">
+                <a href="#!" class="menu-link px-3" data-bs-toggle="tooltip" title="Sắp ra mắt">
                  <i class="ki-duotone ki-folder-up fs-3 me-2 text-primary">
  <span class="path1"></span>
  <span class="path2"></span>
@@ -212,7 +295,15 @@ const FILE_MANAGER = function () {
 </div>
         </div>
         </div>
-    </div>`)
+    </div>`);
+    var btnUploadFile = $(`<a href="#!" class="menu-link px-3">
+                <i class="ki-duotone ki-file-up fs-3 me-2 text-primary">
+ <span class="path1"></span>
+ <span class="path2"></span>
+</i>
+            Tải lên tệp tin
+        </a>`);
+    toolbar.find(".menu-sub").prepend($(`<div class="menu-item px-3"></div>`).append(btnUploadFile));
     toolbar.title = function (title = "Digital Innovation") {
         toolbar.find(".card-title .text").text(title)
     }
@@ -243,7 +334,7 @@ const FILE_MANAGER = function () {
                          </div>
                     </div
     </div>`);
-    
+
     var container = $(`<div class="modal modal-xl file-manager-wrapper fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog file-manager-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -258,11 +349,18 @@ const FILE_MANAGER = function () {
     fileContainer.find(".file-manager-footer").append(pagination).append(btnChoose);
     body.append(sidebar).append(fileContainer).append(infoSidebar);
     container.find(".modal-header").append(header);
-    container.find(".modal-body").append(body).append(overlayAddFolder);
-    const show = async function() {
+    container.find(".modal-body").append(body).append(overlayAddFolder).append(overlayUpload).append(uploadEl);
+    const show = async function () {
         getAllInfo();
         await getListFolder();
         draw();
+        if (targetEl) {
+
+        }
+        else {
+            uploadOption.maximumFileSize = 250 * 1024 * 1024;
+            uploadEl.attr("accept", allowedExtensions.map(c => ` .${c}`).join(","));
+        }
         container.modal("show");
     }
     const getListFolder = async function () {
@@ -274,7 +372,7 @@ const FILE_MANAGER = function () {
                 folderData = res.resources;
                 folderData.forEach((item) => {
                     var isParentFolder = folderData.findIndex(c => c.parentId == item.id) > 0;
-                    var menuItem = $(`<div class="menu-item ${item.parentId == null ? `menu-sub-indention` : ``} ${isParentFolder ? `menu-accordion` :``}" ${isParentFolder ?`data-kt-menu-trigger="click"`:``}>
+                    var menuItem = $(`<div class="menu-item ${item.parentId == null ? `menu-sub-indention` : ``} ${isParentFolder ? `menu-accordion` : ``}" ${isParentFolder ? `data-kt-menu-trigger="click"` : ``}>
         <a href="#" data-id="${item.id}" class="menu-link py-3 me-0">
             <span class="menu-icon ">
                 <span class="menu-arrow me-2 ${isParentFolder ? `` : `fade`}"></span>
@@ -300,8 +398,8 @@ const FILE_MANAGER = function () {
         }
     }
 
-    const openFolder = function() {
-        
+    const openFolder = function () {
+
     }
 
     const initPagination = function (totalPages, currentPage) {
@@ -359,7 +457,7 @@ const FILE_MANAGER = function () {
                     }
                     parentEl.append(itemEl);
                 })
-
+                infoSidebar.find("[name=recordsTotal]").text(res.recordsTotal);
                 const totalPages = Math.ceil(res.recordsTotal / ajax.length);
                 const startIndex = (ajax.draw - 1) * ajax.length;
                 const endIndex = Math.min(startIndex + ajax.length, res.recordsFiltered);
@@ -470,10 +568,10 @@ const FILE_MANAGER = function () {
             overlayAddFolder.show();
             overlayAddFolder.addClass("show");
             overlayAddFolder.find("input[name=new_folder_name]").focus();
-            
+
         });
     }
-    const getAllInfo = async function(){
+    const getAllInfo = async function () {
         try {
             var res = await httpService.getAsync("file-manager/api/get-info");
             if (res.isSucceeded) {
@@ -485,7 +583,7 @@ const FILE_MANAGER = function () {
         catch (e) {
             console.warn(e);
         }
-       
+
     }
     const showViewMode = (viewMode = null) => {
         var showViewMode = viewMode == null ? option.viewMode : viewMode;
@@ -538,16 +636,17 @@ const FILE_MANAGER = function () {
                 menu.show(item);
             })
         }
+        selectedData.change();
     }
 
-    const handleFolder =  async function  () {
+    const handleFolder = async function () {
         sidebar.on("click", ".menu-link", function (e) {
             if ($(this).hasClass("active")) {
                 e.preventDefault();
                 return;
             }
             var id = $(this).data("id");
-            activeFolder(id);draw();
+            activeFolder(id); draw();
         })
     }
     const handleAction = async function () {
@@ -568,7 +667,7 @@ const FILE_MANAGER = function () {
         $(container).on("click", ".control-container", function (e) {
             e.stopPropagation();
         })
-        $(container).on("click", ".box-overlay", function (e) {
+        $(container).on("click", ".box-overlay:not(.fixed)", function (e) {
             let target = $(this);
             target.removeClass("show");
             setTimeout(() => {
@@ -592,8 +691,60 @@ const FILE_MANAGER = function () {
             showViewMode();
         });
     }
+
+    const detail = async function (id) {
+        try {
+            var res = await httpService.getAsync(`file-manager/api/detail/${id}`);
+            if (res.isSucceeded) {
+                return res.resources;
+            }
+        } catch (e) {
+            console.warn(e);
+        }
+    }
+
     const handleInfo = async function () {
         const btnClose = infoSidebar.find("[data-action=close]");
+        var title = infoSidebar.find(".card-title");
+        var allowedExtensionsContent = infoSidebar.find("#directory-allowed-extensions"); 
+        var toolBar = infoSidebar.find("[data-control=toolbar]")
+        const showInfo = async function (id) {
+            if (!btnInfo.hasClass("active")) {
+                return;
+            }
+            var info = id == null ? {
+                name: "Digital Innovation",
+                isDirectory: true
+            } : await detail(id);
+
+            if (info) {
+                if (info.isDirectory) {
+                    title.html($(`<div class="d-flex align-items-center">${info.name}</div>`).prepend(iconOptions.folder("fs-3 me-2")));
+                    if (allowedExtensions.length > 0) {
+                        var content = allowedExtensionsContent.find("[name=allowed-extensions]").html("");
+                        allowedExtensions.forEach((item) => {
+                            content.append(`<span class="badge badge-secondary">.${item}</span>`)
+                        })
+                    }
+                    else {
+                        allowedExtensionsContent.find("[name=allowed-extensions]").html(`Không giới hạn`);
+                    }
+                    toolBar.removeClass("show");
+                }
+                else {
+                    toolBar.addClass("show");
+                }
+            }
+        }
+        selectedData.change = function () {
+            if (selectedData.length > 0) {
+
+            }
+            else {
+                showInfo(ajax.parentId);
+            }
+        }
+
         btnClose.on("click", function () {
             btnInfo.removeClass("active");
             infoSidebar.hide();
@@ -608,7 +759,175 @@ const FILE_MANAGER = function () {
                 $(this).addClass("active");
                 infoSidebar.show();
             }
-            
+            selectedData.change();
+        })
+        infoSidebar.on("submit", function (e) {
+            e.preventDefault();
+        })
+    }
+
+    const handleWrapper = function () {
+        $("[data-file-manager=true]").on("click", "[data-file-manager-action=change]", function (e) {
+            e.preventDefault();
+            targetEl = $(this).parent().find(".file-manager-wrapper");
+            show();
+        })
+    }
+    const handleHide = function () {
+        container.on("hide.bs.modal", function (e) {
+            if (uploadStatus) {
+                e.preventDefault();
+                Swal.fire({
+                    text: "Bạn có chắc chắn muốn đóng, việc tải têp tin sẽ dừng lại?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    buttonsStyling: false,
+                    confirmButtonText: "Có",
+                    cancelButtonText: "Không",
+                    customClass: {
+                        confirmButton: "btn btn-primary",
+                        cancelButton: "btn btn-active-light"
+                    }
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        uploadStatus = false;
+                        container.modal("hide");
+                    }
+                });
+            }
+            else {
+                targetEl = null;
+            }
+        });
+    }
+    function formatDuration(seconds) {
+        if (seconds < 1) {
+            return "0 giây";
+        }
+        const duration = moment.duration(seconds, 'seconds');
+        const days = Math.floor(duration.asDays()); // Lấy phần nguyên của ngày
+        const hours = duration.hours(); // Lấy phần giờ còn lại sau khi chia cho ngày
+        const minutes = duration.minutes(); // Lấy phần phút còn lại sau khi chia cho giờ
+        const remainingSeconds = duration.seconds(); // Lấy phần giây còn lại
+
+        let result = '';
+
+        if (days > 0) result += `${days} ngày `;
+        if (hours > 0) result += `${hours} giờ `;
+        if (minutes > 0) result += `${minutes} phút `;
+        if (remainingSeconds > 0) result += `${remainingSeconds} giây`;
+        return result.trim(); // Xóa khoảng trắng dư thừa
+    }
+    const handleUpload = function () {
+        var uploadedSize = 0;
+        var fileTotalSize = 0;
+        var uploadNormalSpeed = 5;//5Mbps
+        const CHUNK_SIZE = 1024 * 1024; // 1MB per chunk;
+        var btnUpload = toolbar.find("[data-action=upload]");
+        var progress = overlayUpload.find("[data-control=progress]");
+        var progressTitle = progress.find("[role=title]");
+        var progressPercent = progress.find("[role=percent]");
+        var progressEl = progress.find("[role=progressbar]");
+        var progressTime = progress.find("[role=time]");
+        btnUpload.on("click", function (e) {
+            e.preventDefault();
+            uploadEl.val(null).click();
+        })
+        btnUploadFile.on("click", function (e) {
+            e.preventDefault();
+            uploadEl.val(null).click();
+        })
+        btnUploadFile.on("click", function (e) {
+            e.preventDefault();
+        })
+
+        //upload to server
+        uploadEl.on("change", function () {
+            try {
+                uploadedSize = 0;
+                fileTotalSize = 0;
+                var uploadingSpeed = uploadNormalSpeed;
+                var files = uploadEl[0].files;
+                files.forEach(function (file) {
+                    if (file.size > uploadOption.maximumFileSize) {
+                        toastr.error(`Kích thước tối đa của tệp tin là ${convertBytes(uploadOption.maximumFileSize)}`);
+                        throw `Invalid file size! maximum file size is ${convertBytes(uploadOption.maximumFileSize)}`;
+                    }
+                    fileTotalSize += file.size;
+                })
+                overlayUpload.show().addClass("show");
+                progressTitle.text(`Đang tải ${files.length} tệp tin`);
+                progressPercent.text(`0%`);
+                var beginTime = fileTotalSize / (uploadNormalSpeed * 1024 * 1024);
+                progressTime.text(`${convertBytes(uploadedSize) } / ${convertBytes(fileTotalSize)} (Còn khoảng ${formatDuration(beginTime)})`);
+                progressEl.removeClass("bg-success bg-danger").addClass("bg-success");
+                progressEl.css("width", "0%").attr("aria-valuenow", 0);
+                var progessBarCheck = setInterval(function () {
+                    var time = (fileTotalSize - uploadedSize) / (uploadingSpeed * 1024 * 1024);
+                    progressTime.text(`${convertBytes(uploadedSize)} / ${convertBytes(fileTotalSize)} (Còn khoảng ${formatDuration(time)})`);
+                    if (!uploadStatus) {
+                        clearInterval(progessBarCheck);
+                        overlayUpload.removeClass("show");
+                        setTimeout(overlayUpload.hide, option.timeOut);
+                    }
+                }, 500);
+                files.forEach(function (file) {
+                    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+                    let chunkIndex = 0;
+
+                    async function uploadChunk() {
+                        const start = chunkIndex * CHUNK_SIZE;
+                        const end = Math.min(file.size, start + CHUNK_SIZE);
+                        const chunk = file.slice(start, end);
+
+                        const formData = new FormData();
+                        formData.append('chunk', chunk);
+                        formData.append('fileName', file.name);
+                        formData.append('chunkIndex', chunkIndex);
+                        formData.append('totalChunks', totalChunks);
+
+                        try {
+                            var startTime = new Date();
+                            //const response = await $.ajax({
+                            //    url: '/file-manager/api/upload',
+                            //    type: 'POST',
+                            //    data: formData,
+                            //    beforeSend: function (xhr) {
+                            //        if (localStorage.Authorization) {
+                            //            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
+                            //        }
+                            //    },
+                            //    contentType: false,
+                            //    processData: false,
+                            //});
+                            var endTime = new Date();
+                            uploadingSpeed = 1000 / (endTime.getTime() + 100 - startTime.getTime());
+                            uploadedSize += chunk.size;
+                            chunkIndex++;
+                            percent = (uploadedSize * 100 / fileTotalSize).toFixed(2);
+                            progressPercent.text(`${percent}%`);
+                            progressEl.css("width", `${percent}%`).attr("aria-valuenow", percent);
+                             
+                            if (chunkIndex < totalChunks) {
+                                setTimeout(function () {
+                                    uploadChunk(); // Upload next chunk
+                                }, 100)//mircro delay 
+                            } else {
+                                //$('#uploadStatus').text('File uploaded successfully!');
+                            }
+                        } catch (error) {
+                            progressEl.removeClass("bg-success bg-danger").addClass("bg-danger");
+                            uploadStatus = false;
+                            toastr.error('Đã có lỗi xảy ra khi tải tệp tin mới! Xin vui lòng thử lại sau!');
+                        }
+                    }
+
+                    uploadChunk();
+                })
+                
+            } catch (e) {
+                console.warn(e);
+            }
         })
     }
     return {
@@ -620,6 +939,9 @@ const FILE_MANAGER = function () {
             handleAction();
             handleAddFolder();
             handleInfo();
+            handleWrapper();
+            handleHide();
+            handleUpload();
             show();
         },
         draw: draw,
@@ -627,6 +949,6 @@ const FILE_MANAGER = function () {
     }
 }();
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     FILE_MANAGER.init();
 })

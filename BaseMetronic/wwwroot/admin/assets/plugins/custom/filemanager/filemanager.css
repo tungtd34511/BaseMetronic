@@ -106,8 +106,10 @@
         padding: 0;
     }
 
+        .file-manager-wrapper .menu-item > a {
+            transition: all .2s !important;
+        }
 .file-manager-wrapper .menu-item.active > a {
-    transition: all .2s ease;
     background-color: #1b84ff !important;
 }
         .file-manager-wrapper .menu-item.active > a .menu-title{
@@ -169,6 +171,8 @@
     align-items: center;
     background-color: var(--bs-overlay-bg);
     transition: all .3s ease;
+    border-bottom-left-radius: var(--bs-modal-border-radius);
+    border-bottom-right-radius: var(--bs-modal-border-radius);
 }
 .file-manager-wrapper .box-overlay.show {
     transition: all 0.3s ease;
