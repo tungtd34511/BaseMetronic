@@ -1,16 +1,8 @@
 ﻿"use trict";
 const FILE_MANAGER = function () {
-    var folderData = [], selectedData = [];
-    var uploadStatus = true;
-    var targetEl;
-    var imgExtensions = [
-        "jpeg", "jpg", "png", "gif",
-        "bmp", "webp", "tiff"
-    ];
-    var docExtensions = [
-        "doc", "docx", "ppt", "pptx",
-        "xls", "xlsx", "odt", "pdf", "txt"
-    ];
+    var folderData = [], selectedData = [], dataSrc = [];
+    var uploadStatus = false;
+    var targetEl, btnTargetEl;
 
     var allowedExtensions = [
         "avi", "mov", "webm", "mp4", "mp3", "flac", "aac", "ogg",
@@ -18,16 +10,47 @@ const FILE_MANAGER = function () {
         "bmp", "webp", "tiff", "doc", "docx", "ppt", "pptx",
         "xls", "xlsx", "odt", "pdf", "txt"
     ];
-
+    var extensions = {
+        mcrsWord: [".doc", ".docx"],
+        mcrsExcel: [".xls", ".xlsx", ".xlsm", ".xlsb "],
+        PDF: [".pdf"],
+        imgExtensions: [
+            "jpeg", "jpg", "png", "gif",
+            "bmp", "webp", "tiff"
+        ]
+    }
     var viewModeOptions = {
         fullscreen: "fullscreen",
         default: "default"
     }
     var ajax = {
+        search: {
+            value: ""
+        },
         parentId: null,
         length: 50,
         start: 0,
-        draw: 1
+        end: 0,
+        draw: 1,
+        accept: "",
+        regen: () => {
+            ajax.length = 50;
+            ajax.start = 0;
+            ajax.draw = 1;
+            ajax.end = (ajax.draw - 1) * ajax.length;
+            ajax.search.value = "";
+            return ajax;
+        },
+        load: () => {
+            draw();
+            return ajax;
+        },
+        page: function (index) {
+            ajax.draw = index;
+            ajax.start = (ajax.draw - 1) * ajax.length;
+            ajax.end = (ajax.draw - 1) * ajax.length;
+            return ajax;
+        }
     }
     var uploadOption = {
         accept: "",
@@ -63,6 +86,10 @@ const FILE_MANAGER = function () {
         timeOut: 150,//miliseconds,
         maximumFileSize: 5 * 1024 * 1024 * 1024,
         maximumImageResolution: 50,
+        multiple: false
+    }
+    var selectionOption = {
+        multiple: false
     }
     toastr.options = {
         "closeButton": true,
@@ -80,6 +107,12 @@ const FILE_MANAGER = function () {
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     };
+    var emptyTemplate = $(`<div class="position-absolute start-0 top-0  w-100 h-100">
+    <div class="d-flex flex-column flex-center w-100 h-100">
+                        <img src = "/admin/assets/media/illustrations/sketchy-1/5.png" class= "mw-400px" >
+                        <div class="fs-1 fw-bolder text-dark mb-4" > Thư mục này trống!</div>
+                        <div class="fs-6" >Tạo thư mục mới hoặc tải tệp tin! </div>
+                        </div></div>`);
     var uploadEl = $(`<input type="file" class="d-none" accept="" multiple/>`);
     var infoSidebar = $(`<form class="card rounded-top-0 rounded-start-0  min-w-300px mw-300px">
         <div class="card-header border-0 min-h-20px p-2 px-5">
@@ -114,7 +147,7 @@ const FILE_MANAGER = function () {
                 </div> 
             </div>
         </div>
-        <div class="card-footer border-0 p-2 px-5">
+        <div class="card-footer border-0  p-2 px-5">
             <div class="d-flex justify-content-end fade show" data-control="toolbar" >
             <!--begin::Button-->
             <button type="submit" class="btn btn-primary btn-sm me-5" >
@@ -153,7 +186,7 @@ const FILE_MANAGER = function () {
                         </div>
 
                         <div class="h-5px mx-3 w-100 bg-light mb-3">
-                            <div class="bg-success rounded h-5px" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="bg-success rounded h-5px" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         <div class="d-flex justify-content-between w-100 mt-auto">
                             <span class="fw-semibold fs-8 text-gray-700" role="time">5 MB/6 GB (Còn khoảng 5 phút)</span>
@@ -260,10 +293,27 @@ const FILE_MANAGER = function () {
         </a>`);
     var moreMenu = $(`<div class="menu menu-sub rounded menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-175px py-4" data-kt-menu="true"></div>`)
     moreMenu.append($(`<div class="menu-item px-3"></div>`).append(btnAddFolder));
-
-    var toolbar = $(`<div class="card card-flush rounded-0">
-        <div class="card-header align-items-center min-h-20px p-0 gap-2 gap-md-5 m-2 mx-5">
-            <div class="card-title my-0"><span class="text">Digital Innovation</span></div>
+    var btnUploadFile = $(`<a href="#!" class="menu-link px-3">
+                <i class="ki-duotone ki-file-up fs-3 me-2 text-primary">
+ <span class="path1"></span>
+ <span class="path2"></span>
+</i>
+            Tải lên tệp tin
+        </a>`);
+    var btnChoose = $(`<button class="btn text-nowrap btn-primary btn-sm" disabled>
+            <i class="ki-duotone ki-check fs-3"></i> Chọn
+        </button>`)
+    var pagination = $(`<ul class="pagination w-100 fade show">
+    <li class="page-item previous disabled"><a href="#" class="page-link"><i class="previous"></i></a></li>
+    <li class="page-item next"><a href="#"  class="page-link"><i class="next"></i></a></li>
+</ul>`)
+    var sidebar = $(`<div class="border-end">
+<div class="menu menu-column menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 menu-arrow-gray-500 menu-state-bg fw-semibold w-200px" data-kt-menu="true"></div>
+    </div>`);
+    var fileContainer = $(`<div class='w-100 position-relative'>
+    <div class="card file-manager-container">
+    <div class="card-header file-manager-toolbar align-items-center min-h-20px p-0 gap-2 gap-md-5 p-2 px-5">
+        <div class="card-title my-0"><span class="text">Digital Innovation</span></div>
         <div class="card-toolbar flex-row-fluid justify-content-end gap-1 my-0" ><div>
             <div class="input-group input-group-sm btn-active-light-primary">
     <span class="input-group-text btn btn-primary btn-sm border-end" data-action="upload">
@@ -294,48 +344,17 @@ const FILE_MANAGER = function () {
 </div>
 </div>
         </div>
-        </div>
-    </div>`);
-    var btnUploadFile = $(`<a href="#!" class="menu-link px-3">
-                <i class="ki-duotone ki-file-up fs-3 me-2 text-primary">
- <span class="path1"></span>
- <span class="path2"></span>
-</i>
-            Tải lên tệp tin
-        </a>`);
-    toolbar.find(".menu-sub").prepend($(`<div class="menu-item px-3"></div>`).append(btnUploadFile));
-    toolbar.title = function (title = "Digital Innovation") {
-        toolbar.find(".card-title .text").text(title)
-    }
-    toolbar.find(".card-title").prepend(btnBack);
-    toolbar.find(".card-toolbar").prepend(moreMenu).prepend(btnMore).prepend(btnSetting).prepend(btnZoom).prepend(btnSearch).prepend(btnInfo);
-    var btnChoose = $(`<button class="btn text-nowrap btn-primary btn-sm" disabled>
-            <i class="ki-duotone ki-check fs-3"></i> Chọn
-        </button>`)
-    var pagination = $(`<ul class="pagination w-100 fade show">
-    <li class="page-item previous disabled"><a href="#" class="page-link"><i class="previous"></i></a></li>
-    <li class="page-item next"><a href="#"  class="page-link"><i class="next"></i></a></li>
-</ul>`)
-    var sidebar = $(`<div class="border-end">
-<div class="menu menu-column menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 menu-arrow-gray-500 menu-state-bg fw-semibold w-200px" data-kt-menu="true"></div>
-    </div>`);
-    var fileContainer = $(`<div class='w-100 position-relative'>
-    <div class="d-flex flex-column">
-    <div class="file-manager-toolbar "></div>
-                 <div class="file-manager-body">
-                    <div class="hover-scroll-y p-3 pe-1 bg-light-secondary file-manager-gallery" style="min-height: 736px;max-height: 736px;--file-gallery-size: ${option.gallerySize}px">
+    </div>
+                 <div class="card-body file-manager-body position-relative p-0">
+                    <div class="hover-scroll-y p-3 pe-1 bg-light-secondary file-manager-gallery" style="min-height: 748px;max-height: 748px;--file-gallery-size: ${option.gallerySize}px">
                         <div class="file-manager-grid"></div>
                     </div>
                       </div>
-                    </div>
-                    <div class="card card-flush position-absolute bottom-0 w-100 rounded-top-0 rounded-start-0 border-0">
-                    <div class="card-header min-h-20px p-2 px-5">
-                         <div class="card-toolbar flex-row-fluid flex-nowrap align-items-center gap-5 my-0 file-manager-footer"></div>
-                         </div>
+                    <div class="card-footer file-manager-footer p-2 px-5">
                     </div
     </div>`);
 
-    var container = $(`<div class="modal modal-xl file-manager-wrapper fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    var container = $(`<div class="modal modal-xl file-manager-wrapper fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="false">
     <div class="modal-dialog file-manager-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header p-0 border-0 justify-content-end"></div>
@@ -343,9 +362,17 @@ const FILE_MANAGER = function () {
         </div>
     </div>
 </div>`);
+    toolbar = fileContainer.find(".file-manager-toolbar");
+    toolbar.find(".menu-sub").prepend($(`<div class="menu-item px-3"></div>`).append(btnUploadFile));
+    toolbar.title = function (title = "Digital Innovation") {
+        toolbar.find(".card-title .text").text(title)
+    }
+    toolbar.find(".card-title").prepend(btnBack);
+    toolbar.find(".card-toolbar").prepend(moreMenu).prepend(btnMore).prepend(btnSetting).prepend(btnZoom).prepend(btnSearch).prepend(btnInfo);
 
     var body = $("<div class='d-flex h-100'></div>");
     fileContainer.find(".file-manager-toolbar").append(toolbar);
+    fileContainer.find(".file-manager-body").append(emptyTemplate);
     fileContainer.find(".file-manager-footer").append(pagination).append(btnChoose);
     body.append(sidebar).append(fileContainer).append(infoSidebar);
     container.find(".modal-header").append(header);
@@ -353,14 +380,35 @@ const FILE_MANAGER = function () {
     const show = async function () {
         getAllInfo();
         await getListFolder();
-        draw();
         if (targetEl) {
-
+            uploadOption.accept = targetEl.attr("file-accept") || "";
+            ajax.accept = uploadOption.accept;
+            var max = targetEl.attr("max");
+            if (max) {
+                uploadOption.maximumFileSize = parseInt(max);
+            }
+            else {
+                uploadOption.maximumFileSize = option.maximumFileSize;//25 MB
+            }
+            if (uploadOption.accept) {
+                uploadEl.attr("accept", t.acceptType);
+            }
+            else {
+                uploadEl.attr("accept", "");
+            }
+            if (targetEl.prop("multiple")) {
+                selectionOption.multiple = true;
+            }
+            else {
+                selectionOption.multiple = option.multiple;
+            }
         }
         else {
             uploadOption.maximumFileSize = 250 * 1024 * 1024;
             uploadEl.attr("accept", allowedExtensions.map(c => ` .${c}`).join(","));
+            selectionOption.multiple = option.multiple;
         }
+        ajax.regen().load();
         container.modal("show");
     }
     const getListFolder = async function () {
@@ -444,25 +492,96 @@ const FILE_MANAGER = function () {
             var res = await httpService.postAsync("file-manager/api/list-server-side", ajax);
             if (res.data) {
                 var parentEl = fileContainer.find(".file-manager-grid").html("");
-                res.data.forEach((item) => {
-                    var itemEl = $(`<div class="gallery-item card rounded-0" data-id="${item.id}">
+                if (res.data == undefined || res.data == null || res.data.length == 0) {
+                    ;
+                    emptyTemplate.show();
+                }
+                else {
+                    emptyTemplate.hide();
+                    dataSrc = res.data;
+                    res.data.forEach((item) => {
+                        let createdTime = moment(item.createdTime).format("DD/MM/YYYY HH:mm:ss");
+                        var itemEl = $(`<div class="gallery-item card rounded-0" data-id="${item.id}" title="${item.name + ` Kích cỡ: ` + convertBytes(item.size) + ` Ngày tạo: ` + createdTime}">
                         <div class="gallery-item-figure"></div>
-                        <div class="card-footer p-2 fw-semibold">${item.name}</div>
+                        <div class="card-footer p-2 fw-semibold">
+                            <div class="gallery-item-name fs-7">${item.name}</div>
+                        </div>
                     </div>`);
-                    if (item.isDirectory) {
-                        itemEl.attr('data-is-directory', true)
-                        itemEl.find(".gallery-item-figure")
-                            .append($(`<div class="h-100 d-flex justify-content-center align-items-center"></div>`)
-                                .append(iconOptions.folder("text-warning fs-5x")));
-                    }
-                    parentEl.append(itemEl);
-                })
+                        var figure = itemEl.find(".gallery-item-figure");
+                        if (item.isDirectory) {
+                            itemEl.attr('data-is-directory', true)
+                            itemEl.find(".gallery-item-figure")
+                                .append($(`<div class="h-100 d-flex justify-content-center align-items-center"></div>`)
+                                    .append(iconOptions.folder("text-warning fs-5x")));
+                        }
+                        else {
+                            itemEl.attr('data-is-directory', false)
+                                .append(`<div class="bg-dark-inverse position-absolute start-0 top-0 px-2 fs-7">${item.extension.toUpperCase()}</div>`)
+                                .find(".card-footer")
+                                .append(`<button class="file_check position-absolute end-0 bottom-0 fs-3 me-2 mb-2 btn btn-icon"><i class="ki-duotone ki-check"></i></button>`);
+                            var mime = item.mimeType;
+                            var thumbContent = "";
+                            fileThumbPath = item.thumbnailPath
+                            if (mime.includes("image")) {
+                                thumbContent = `<img class="item_img" alt="alt" src="${fileThumbPath}" />
+											<a class="d-none" data-fslightbox="file_gallery" href="/upload${item.path}">
+											</a>`;
+                            }
+                            else if (mime.includes("video")) {
+                                thumbContent = `<div class="d-flex thumb-icon d-block overlay">
+                                                                                                            <span ><i class="fa-solid fa-video text-primary"></i></span>
+                                                                                                                <a data-fslightbox="gallery-file" href="${fileFullPath}" class="overlay-layer card-rounded bg-dark bg-opacity-25">
+                                                                                                            <i class="fa fa-eye  text-primary"></i>
+                                                                                                                </a>
+                                                                                        </div>`;
+                            }
+                            else if (mime.includes("audio")) {
+                                thumbContent = `<div class="d-flex thumb-icon d-block overlay">
+                                                                                                                    <span><i class="fa-solid fa-headphones text-primary"></i></span>
+                                                                                                                        <a data-fslightbox="gallery-file" href="${fileFullPath}" class="overlay-layer card-rounded bg-dark bg-opacity-25">
+                                                                                                            <i class="fa fa-eye  text-primary"></i>
+                                                                                                                </a>
+                                                                                            </div>`;
+                            }
+                            else if (mime.includes("text")) {
+                                thumbContent = `<div class="d-flex thumb-icon">
+                                                                                                                <span><i class="fa-solid fa-file-lines text-primary" > </i></span>
+                                                                                            </div>`;
+                            }
+                            else if (extensions.mcrsWord.includes(item.extension)) {
+                                thumbContent = `<div class="d-flex thumb-icon">
+                                                                                                                                <span><i class="fa-solid fa-file-word text-primary" > </i></span>
+                                                                                                    </div>`;
+                            }
+                            else if (extensions.mcrsExcel.includes(item.extension)) {
+                                thumbContent = `<div class="d-flex thumb-icon">
+                                                                                                                                <span><i class="fa-solid fa-file-excel text-success" > </i></span>
+                                                                                                    </div>`;
+                            }
+                            else if (extensions.PDF.includes(item.extension)) {
+                                thumbContent = `<div class="d-flex thumb-icon">
+                                                                                                                                    <span><i class="fa-solid fa-file-pdf text-danger" > </i></span>
+                                                                                                        </div>`;
+                            }
+                            else {
+                                thumbContent = `<div class="d-flex thumb-icon">
+                                                                                                                        <i class="fa-solid fa-file">
+</i>
+                                                                                                </div>`;
+                            }
+                            $(figure).append(thumbContent);
+                        }
+                        parentEl.append(itemEl);
+                    })
+                }
+                refreshFsLightbox();
                 infoSidebar.find("[name=recordsTotal]").text(res.recordsTotal);
                 const totalPages = Math.ceil(res.recordsTotal / ajax.length);
                 const startIndex = (ajax.draw - 1) * ajax.length;
                 const endIndex = Math.min(startIndex + ajax.length, res.recordsFiltered);
                 const currentData = res.data.slice(startIndex, endIndex);
                 initPagination(totalPages, ajax.draw);
+                selectedData.clear().change();
             }
         } catch (e) {
             console.warn(e);
@@ -622,8 +741,7 @@ const FILE_MANAGER = function () {
         }
         var menuEl = sidebar.find("[data-kt-menu=true]");
         var menu = KTMenu.getInstance(menuEl[0]);
-        var menuItems = menuEl.find(".menu-item.hover.showing").removeClass("hover showing");
-        var menuItems = menuEl.find(".menu-sub-accordion.show").removeClass("show");
+        var menuItems = menuEl.find(".menu-item.hover.showing").removeClass("hover").removeClass("showing");
         menuEl.find(".menu-link.active").removeClass("active");
         menu.update();
         if (ajax.parentId != null) {
@@ -706,7 +824,7 @@ const FILE_MANAGER = function () {
     const handleInfo = async function () {
         const btnClose = infoSidebar.find("[data-action=close]");
         var title = infoSidebar.find(".card-title");
-        var allowedExtensionsContent = infoSidebar.find("#directory-allowed-extensions"); 
+        var allowedExtensionsContent = infoSidebar.find("#directory-allowed-extensions");
         var toolBar = infoSidebar.find("[data-control=toolbar]")
         const showInfo = async function (id) {
             if (!btnInfo.hasClass("active")) {
@@ -736,13 +854,10 @@ const FILE_MANAGER = function () {
                 }
             }
         }
+        var oldEvent = selectedData.change;
         selectedData.change = function () {
-            if (selectedData.length > 0) {
-
-            }
-            else {
-                showInfo(ajax.parentId);
-            }
+            oldEvent();
+            showInfo(ajax.parentId);
         }
 
         btnClose.on("click", function () {
@@ -822,7 +937,7 @@ const FILE_MANAGER = function () {
         var uploadedSize = 0;
         var fileTotalSize = 0;
         var uploadNormalSpeed = 5;//5Mbps
-        const CHUNK_SIZE = 1024 * 1024; // 1MB per chunk;
+        const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk;
         var btnUpload = toolbar.find("[data-action=upload]");
         var progress = overlayUpload.find("[data-control=progress]");
         var progressTitle = progress.find("[role=title]");
@@ -846,6 +961,8 @@ const FILE_MANAGER = function () {
             try {
                 uploadedSize = 0;
                 fileTotalSize = 0;
+                fileUploadedTotal = 0;
+                var localTime = new Date().getTime();
                 var uploadingSpeed = uploadNormalSpeed;
                 var files = uploadEl[0].files;
                 files.forEach(function (file) {
@@ -856,21 +973,30 @@ const FILE_MANAGER = function () {
                     fileTotalSize += file.size;
                 })
                 overlayUpload.show().addClass("show");
+                uploadStatus = true;
                 progressTitle.text(`Đang tải ${files.length} tệp tin`);
                 progressPercent.text(`0%`);
                 var beginTime = fileTotalSize / (uploadNormalSpeed * 1024 * 1024);
-                progressTime.text(`${convertBytes(uploadedSize) } / ${convertBytes(fileTotalSize)} (Còn khoảng ${formatDuration(beginTime)})`);
-                progressEl.removeClass("bg-success bg-danger").addClass("bg-success");
+                progressTime.text(`${convertBytes(uploadedSize)} / ${convertBytes(fileTotalSize)} (Còn khoảng ${formatDuration(beginTime)})`);
                 progressEl.css("width", "0%").attr("aria-valuenow", 0);
                 var progessBarCheck = setInterval(function () {
                     var time = (fileTotalSize - uploadedSize) / (uploadingSpeed * 1024 * 1024);
                     progressTime.text(`${convertBytes(uploadedSize)} / ${convertBytes(fileTotalSize)} (Còn khoảng ${formatDuration(time)})`);
+                    percent = (uploadedSize * 100 / fileTotalSize).toFixed(2);
+                    progressPercent.text(`${percent}%`);
+                    progressEl.css("width", `${percent}%`).attr("aria-valuenow", percent);
                     if (!uploadStatus) {
+                        getAllInfo();
+                        draw();
+                        setTimeout(function () {
+                            overlayUpload.removeClass("show");
+                            progressEl.css("width", "0%").attr("aria-valuenow", 0);
+                            overlayUpload.hide();
+                        }, 500);
                         clearInterval(progessBarCheck);
-                        overlayUpload.removeClass("show");
-                        setTimeout(overlayUpload.hide, option.timeOut);
                     }
                 }, 500);
+
                 files.forEach(function (file) {
                     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
                     let chunkIndex = 0;
@@ -885,38 +1011,48 @@ const FILE_MANAGER = function () {
                         formData.append('fileName', file.name);
                         formData.append('chunkIndex', chunkIndex);
                         formData.append('totalChunks', totalChunks);
+                        if (ajax.parentId != null) {
+                            formData.append('parentId', ajax.parentId);
+                        }
+                        formData.append('localTime', localTime);
 
                         try {
                             var startTime = new Date();
-                            //const response = await $.ajax({
-                            //    url: '/file-manager/api/upload',
-                            //    type: 'POST',
-                            //    data: formData,
-                            //    beforeSend: function (xhr) {
-                            //        if (localStorage.Authorization) {
-                            //            xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
-                            //        }
-                            //    },
-                            //    contentType: false,
-                            //    processData: false,
-                            //});
+                            const res = await $.ajax({
+                                url: '/file-manager/api/upload',
+                                type: 'POST',
+                                data: formData,
+                                beforeSend: function (xhr) {
+                                    if (localStorage.Authorization) {
+                                        xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.Authorization);
+                                    }
+                                },
+                                contentType: false,
+                                processData: false,
+                            });
                             var endTime = new Date();
-                            uploadingSpeed = 1000 / (endTime.getTime() + 100 - startTime.getTime());
+                            uploadingSpeed = (chunk.size / (1024 * 1024)) * 1000 / (endTime.getTime() + 100 - startTime.getTime());
                             uploadedSize += chunk.size;
                             chunkIndex++;
-                            percent = (uploadedSize * 100 / fileTotalSize).toFixed(2);
-                            progressPercent.text(`${percent}%`);
-                            progressEl.css("width", `${percent}%`).attr("aria-valuenow", percent);
-                             
-                            if (chunkIndex < totalChunks) {
-                                setTimeout(function () {
-                                    uploadChunk(); // Upload next chunk
-                                }, 100)//mircro delay 
-                            } else {
-                                //$('#uploadStatus').text('File uploaded successfully!');
+                            if (res.isSucceeded) {
+                                if (chunkIndex < totalChunks) {
+                                    setTimeout(function () {
+                                        uploadChunk(); // Upload next chunk
+                                    }, 100)//mircro delay 
+                                } else {
+                                    fileUploadedTotal++;
+                                    if (fileUploadedTotal == files.length) {
+                                        uploadStatus = false;
+                                        toastr.success('Tải tệp tin thành công!');
+                                    }
+                                }
                             }
+                            else {
+                                uploadStatus = false;
+                                toastr.error('Đã có lỗi xảy ra khi tải tệp tin mới! Xin vui lòng thử lại sau!');
+                            }
+
                         } catch (error) {
-                            progressEl.removeClass("bg-success bg-danger").addClass("bg-danger");
                             uploadStatus = false;
                             toastr.error('Đã có lỗi xảy ra khi tải tệp tin mới! Xin vui lòng thử lại sau!');
                         }
@@ -924,9 +1060,186 @@ const FILE_MANAGER = function () {
 
                     uploadChunk();
                 })
-                
+
             } catch (e) {
                 console.warn(e);
+            }
+        })
+    }
+    const handleSelection = function () {
+        let isCtrlPressed = false; // Biến để theo dõi trạng thái phím Ctrl
+
+        // Lắng nghe sự kiện "keydown"
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Control") {
+                isCtrlPressed = true;
+            }
+        });
+
+        // Lắng nghe sự kiện "keyup"
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "Control") {
+                isCtrlPressed = false;
+            }
+        });
+        selectedData.change = function () {
+            if (selectedData.length > 0) {
+                btnChoose.removeAttr("disabled")
+            }
+            else {
+                btnChoose.attr("disabled", true);
+            }
+            return selectedData;
+        }
+        selectedData.clear = function () {
+            while (selectedData.length > 0) {
+                selectedData.splice(0, 1);
+            }
+            fileContainer.find(".gallery-item").removeClass("active");
+            return selectedData;
+        }
+
+        fileContainer.find(".file-manager-grid").on("click", function (e) {
+            if (e.target == this) {
+                selectedData.clear().change();
+            }
+        })
+        fileContainer.on("dblclick", ".file_check", function (e) {
+            e.stopPropagation();
+        });
+        fileContainer.on("dblclick", ".gallery-item[data-is-directory=false]", function (e) {
+            e.stopPropagation();
+            let element = $(this).find("[data-fslightbox]");
+            if (element.length > 0) {
+                element.trigger("click")
+            }
+        });
+        fileContainer.on("click", ".gallery-item[data-is-directory=false]:not(.active)", function (e) {
+            e.stopPropagation();
+            let element = $(this);
+            let fileId = parseInt(element.data("id"));
+            if (fileId) {
+                let file = dataSrc.find(c => c.id == fileId);
+                if (file) {
+                    if (!selectionOption.multiple || !isCtrlPressed) {
+                        selectedData.clear();
+                    }
+                    element.addClass("active");
+                    selectedData.push(file);
+                }
+            }
+            selectedData.change();
+        });
+        fileContainer.on("click", ".file_check", function (e) {
+            e.stopPropagation();
+            let element = $(this).parents(".gallery-item");
+            let fileId = parseInt(element.data("id"));
+            if (fileId) {
+                if (element.hasClass("active")) {
+                    let fileIndex = selectedData.findIndex(c => c.id == fileId);
+                    element.removeClass("active");
+                    selectedData.splice(fileIndex, 1);
+                }
+                else {
+                    let file = dataSrc.find(c => c.id == fileId);
+                    if (file) {
+                        if (!selectionOption.multiple) {
+                            selectedData.clear();
+                        }
+                        element.addClass("active");
+                        selectedData.push(file);
+                    }
+                }
+            }
+
+            selectedData.change();
+        });
+        btnChoose.on('click', function (e) {
+            e.preventDefault();
+            if (selectedData.length == 0) {
+                toastr.error("Bạn chưa chọn tệp tin!")
+                return;
+            }
+            if (!targetEl) {
+                return;
+            }
+
+            let tagName = targetEl.prop("tagName").toLowerCase();
+            if (selectionOption.multiple) {//multiple file
+                targetEl[0].targetFiles = t.dataSource.cache;
+                let names = selectedData.map(c => c.name).join(",");
+                if (tagName == "input") {
+                    targetEl.val(names).trigger("change");
+                }
+                else if (tagName == "div") {
+                    var html = '';
+                    t.dataSource.cache.forEach(function (item, i) {
+                        html += `<div class="image-input image-input-outline image-input-placeholder mb-7"><div class="w-150px h-150px" id="divImage${i}"><img id="postPhoto${i}" src="${item.path}" file-path="${item.path}" class="w-150px h-150px shadow-image object-fit-cover" file-accept="image/*"></div>
+                                    <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow choseFile" data-fm-target="#postPhoto${i}" data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Change avatar" data-bs-original-title="Change avatar" data-kt-initialized="1">
+                                                    <i class="ki-duotone ki-pencil fs-7">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                </label>
+                                                  <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow remove-image" data-kt-image-input-action="remove" data-bs-toggle="tooltip" aria-label="Remove avatar" data-bs-original-title="Remove avatar" data-kt-initialized="1">
+                                <i class="ki-duotone ki-cross fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </label>
+                                                </div>`;
+                    });
+                    targetEl.html(html);
+                }
+                container.modal(hide);
+                return;
+            }
+            let file = selectedData[0];
+            let src = `/upload${file.path}`;
+            targetEl.attr('file-path', src).trigger("change")
+                .attr('file-target-id', file.id)
+                .attr("file-size", file.size)
+                .attr("file-mime", file.mimeType);
+            if (tagName == "input") {
+                if (btnTargetEl.attr("control-type") == "ckeditor4") {
+                    CKEDITOR.dialog.getCurrent().getContentElement('info', 'txtUrl').setValue(src);
+                }
+                else if (targetEl.attr("data-type") == "URL") {
+                    targetEl.val(src).trigger("change");
+                }
+                else {
+                    targetEl.val(file.name).trigger("change");
+                }
+            }
+            else if (tagName == "span") {
+                targetEl.text(file.name);
+            }
+            else if (tagName == "img" || tagName == "source") {
+                targetEl.attr("src", src).trigger("change-avatar");
+            }
+            else if (tagName == "div") {
+                targetEl.css("background-image", `url('${src}')`);
+            }
+            container.modal('hide');
+        })
+
+        $(document).on('click', ".choseFile", function () {
+            btnTargetEl = $(this);
+            var elementId = btnTargetEl.attr("data-fm-target");
+            if (elementId == undefined) {
+                return;
+            }
+            targetEl = $(elementId);
+            show();
+        })
+        $(document).on("click", "[data-file-manager-action=change]", function () {
+            btnTargetEl = $(this);
+            targetEl = btnTargetEl.parent(".file-manager").find(".file-manager-wrapper");
+            if (targetEl.length > 0) {
+                show();
+            }
+            else {
+                targetEl = undefined;
             }
         })
     }
@@ -934,6 +1247,7 @@ const FILE_MANAGER = function () {
         init: function () {
             $(document.body).append(container);
             KTMenu.createInstances();
+            handleSelection();
             initTooltip();
             handleFolder();
             handleAction();
@@ -942,7 +1256,6 @@ const FILE_MANAGER = function () {
             handleWrapper();
             handleHide();
             handleUpload();
-            show();
         },
         draw: draw,
         show: show

@@ -133,9 +133,6 @@
     }
 
 
-     .file-manager-body {
-        margin-bottom: 50px;
-    }
 .modal-fullscreen .file-manager-gallery {
     min-height: calc(100vh - 121px - 50px)!important;
 }
@@ -150,6 +147,8 @@
 .file-manager-gallery .gallery-item {
     cursor: pointer;
     min-width: var(--file-gallery-size);
+    border: unset;
+    transition: all .05s ease-in-out;
 }
 .file-manager-gallery .gallery-item-figure {
     height: var(--file-gallery-size);
@@ -177,4 +176,67 @@
 .file-manager-wrapper .box-overlay.show {
     transition: all 0.3s ease;
     opacity: 1 !important;
+}
+.file-manager-wrapper [role="progressbar"]{
+    transition: width 0.5s ease-in-out;
+}
+.file-manager-gallery .gallery-item .gallery-item-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 20px;
+}
+.file-manager-footer {
+    display: flex;
+    align-items: center;
+}
+.file-manager-container {
+    border-radius: unset !important;
+    border-bottom-right-radius: var(--bs-modal-border-radius) !important;
+    border: unset;
+}
+.gallery-item .thumb-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+    .gallery-item .thumb-icon i{
+        font-size: 5rem !important;
+    }
+.gallery-item-figure .item_img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-item .file_check {
+    opacity: 0;
+    transition: all .25s ease-in-out;
+    height: 18.52px !important;
+    width: 18.52px !important;
+}
+.gallery-item .file_check:hover {
+    background-color: rgba(143, 150, 163, 0.1);
+}
+
+.gallery-item.active {
+    outline: 1px solid var(--bs-primary)
+}
+
+    .gallery-item.active .file_check {
+        opacity: 1;
+    }
+    .gallery-item.active .file_check i {
+        color: var(--bs-primary);
+    }
+
+.gallery-item:hover .file_check {
+    opacity:1;
+}
+.gallery-item .bg-dark-inverse {
+    color: var(--bs-dark-inverse);
+    border-color: var(--bs-dark);
+    background-color: var(--bs-dark);
 }

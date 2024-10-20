@@ -14,5 +14,6 @@ namespace BaseMetronic.Service.Interface
         Task<DionResponse> RenameFolder(RenameDirectoryItemDTO model);
         Task<DionResponse> List(bool isOnlyFolder = false);
         Task<DTResult<DirectoryItemDetail>> List(DTFileManagerParameters parameters);
+        Task<DionResponse> Upload(UploadingFileDTO model);
     }
 }

@@ -152,11 +152,17 @@ namespace BaseMetronic.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Extension")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDirectory")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("MimeType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -172,6 +178,9 @@ namespace BaseMetronic.Migrations
 
                     b.Property<long?>("Size")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("ThumbnailPath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

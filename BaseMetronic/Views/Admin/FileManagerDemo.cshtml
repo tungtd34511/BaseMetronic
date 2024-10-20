@@ -4,6 +4,7 @@
 @section Headers {
     <link href="~/admin/assets/plugins/custom/prismjs/prismjs.bundle.css" rel="stylesheet" />
     <link href="~/admin/assets/plugins/custom/filemanager/filemanager.css" rel="stylesheet" asp-append-version="true" />
+    <script src="~/admin/assets/plugins/custom/fslightbox/fslightbox.bundle.js"></script>
 }
 @section Vendors {
     <script src="~/admin/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
@@ -54,6 +55,7 @@
                                     <code class="language-html">
                                         &lt;link href=&quot;/admin/assets/plugins/custom/filemanager/filemanager.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;/&gt;
                                         &lt;script src=&quot;/admin/assets/plugins/custom/filemanager/filemanager.js&quot;&gt;&lt;/script&gt;
+                                        &lt;script src=&quot;/admin/assets/plugins/custom/fslightbox/fslightbox.bundle.js&quot;&gt;&lt;/script&gt;
                                     </code>
                                 </pre>
                             </div>
@@ -134,10 +136,10 @@
                             <!--begin::Image input-->
                             <div class="file-manager file-manager-empty file-manager-placeholder" data-file-manager="true">
                                 <!--begin::Preview existing avatar-->
-                                <div class="file-manager-wrapper w-125px h-125px" data-accept=".png, .jpg, .jpeg"></div>
+                                <div class="file-manager-wrapper w-125px h-125px" data-accept=".png, .jpg, .jpeg" id="choseFile1"></div>
                                 <!--end::Preview existing avatar-->
                                 <!--begin::Edit-->
-                                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow" data-file-manager-action="change" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Change avatar">
+                                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow choseFile" data-fm-target="#choseFile1" data-file-manager-action="change" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Change avatar">
                                     <i class="ki-duotone ki-pencil fs-6"><span class="path1"></span><span class="path2"></span></i>
                                 </label>
                                 <!--end::Edit-->

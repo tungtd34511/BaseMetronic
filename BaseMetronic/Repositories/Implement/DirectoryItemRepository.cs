@@ -158,7 +158,11 @@ namespace BaseMetronic.Repositories.Implement
                 IsDirectory = c.IsDirectory,
                 Name = c.Name,
                 ParentId = c.ParentId,
-                Path = c.Path
+                Path = c.Path,
+                Size = c.Size,
+                MimeType = c.MimeType,
+                ThumbnailPath = c.ThumbnailPath,
+                Extension = c.Extension
             }).ToListAsync();
             return new DTResult<DirectoryItemDetail>()
             {

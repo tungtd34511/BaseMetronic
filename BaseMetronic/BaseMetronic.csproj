@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Logs\**" />
+    <Compile Remove="wwwroot\admin\assets\plugins\global\fonts\fontawesome-pro-6.5.1\**" />
     <Content Remove="Logs\**" />
+    <Content Remove="wwwroot\admin\assets\plugins\global\fonts\fontawesome-pro-6.5.1\**" />
     <EmbeddedResource Remove="Logs\**" />
+    <EmbeddedResource Remove="wwwroot\admin\assets\plugins\global\fonts\fontawesome-pro-6.5.1\**" />
     <None Remove="Logs\**" />
+    <None Remove="wwwroot\admin\assets\plugins\global\fonts\fontawesome-pro-6.5.1\**" />
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
@@ -50,6 +54,7 @@
 	  <Folder Include="wwwroot\upload\media %282%29\" />
 	  <Folder Include="wwwroot\upload\media\blog\tungtd\avatar\casklmcskascm\" />
 	  <Folder Include="wwwroot\upload\product\" />
+	  <Folder Include="wwwroot\upload\temp\" />
 	  <Folder Include="wwwroot\upload\tungtd %281%29\" />
 	  <Folder Include="wwwroot\upload\tungtd\" />
 	  <Folder Include="wwwroot\upload\videos\" />

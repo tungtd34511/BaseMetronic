@@ -143,30 +143,12 @@ namespace BaseMetronic.Controllers.Core
         }
 
         [HttpPost("api/upload")]
-        public async Task<IActionResult> Upload([FromForm] IFormFile chunk, [FromForm] string fileName, [FromForm] int chunkIndex, [FromForm] int totalChunks)
+        public async Task<IActionResult> Upload([FromForm] UploadingFileDTO file)
         {
             try
             {
-                var _uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "upload");
-
-                if (chunk == null || chunk.Length == 0)
-                    return BadRequest("Invalid chunk.");
-
-                var tempFilePath = Path.Combine(_uploadPath, $"{fileName}.part_{chunkIndex}");
-
-                // Save the chunk
-                using (var stream = new FileStream(tempFilePath, FileMode.Create))
-                {
-                    await chunk.CopyToAsync(stream);
-                }
-
-                // Check if all chunks are uploaded
-                if (chunkIndex + 1 == totalChunks)
-                {
-                    await CombineChunks(fileName, totalChunks);
-                }
-
-                return Ok($"Chunk {chunkIndex + 1} uploaded successfully.");
+                var res =  await _directoryItemService.Upload(file);
+                return Ok(res);
             }
             catch (Exception e)
             {
@@ -176,25 +158,5 @@ namespace BaseMetronic.Controllers.Core
 
         }
 
-        [NonAction]
-        private async Task CombineChunks(string fileName, int totalChunks)
-        {
-            var _uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "upload");
-            var finalFilePath = Path.Combine(_uploadPath, fileName);
-
-            using (var finalStream = new FileStream(finalFilePath, FileMode.Create))
-            {
-                for (int i = 0; i < totalChunks; i++)
-                {
-                    var chunkPath = Path.Combine(_uploadPath, $"{fileName}.part_{i}");
-                    using (var chunkStream = new FileStream(chunkPath, FileMode.Open))
-                    {
-                        await chunkStream.CopyToAsync(finalStream);
-                    }
-                    // Delete chunk after combining
-                    System.IO.File.Delete(chunkPath);
-                }
-            }
-        }
     }
 }
