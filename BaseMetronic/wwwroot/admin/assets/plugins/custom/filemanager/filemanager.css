@@ -148,7 +148,7 @@
     cursor: pointer;
     min-width: var(--file-gallery-size);
     border: unset;
-    transition: all .05s ease-in-out;
+    transition: all .15s ease-in-out;
 }
 .file-manager-gallery .gallery-item-figure {
     height: var(--file-gallery-size);

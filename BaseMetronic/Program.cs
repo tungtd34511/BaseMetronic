@@ -37,6 +37,11 @@ if (!app.Environment.IsDevelopment())
 app.Use(async (ctx, next) =>
 {
     await next();
+    var extension = Path.GetExtension(ctx.Request.Path.Value);
+    if (string.IsNullOrEmpty(extension))
+    {
+
+    }
     if (!ctx.Request.Path.Value.Contains("api") && ctx.Request.Path.Value.Contains("admin") && !ctx.Response.HasStarted)
     {
         if (ctx.Response.StatusCode == 401) //UnAuthorization
@@ -65,6 +70,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Admin}/{action=Index}/{id?}");
 
 app.Run();

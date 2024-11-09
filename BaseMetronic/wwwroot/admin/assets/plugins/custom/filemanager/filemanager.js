@@ -1242,6 +1242,14 @@ const FILE_MANAGER = function () {
                 targetEl = undefined;
             }
         })
+        pagination.on("click", ".page-link:not(.active)", function (e) {
+            e.preventDefault();
+            var target = $(this);
+            var pageIndex = target.data("page");
+            if (pageIndex) {
+                ajax.page(pageIndex); draw();
+            }
+        })
     }
     return {
         init: function () {
